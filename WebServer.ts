@@ -1,5 +1,6 @@
 import { appendFile } from "fs";
 import { TemplateEngine } from './TemplateEngine';
+import { IncomingMessage, ServerResponse } from 'http';
 
 /**
  * 
@@ -7,64 +8,39 @@ import { TemplateEngine } from './TemplateEngine';
  */
 export class Webserver extends TemplateEngine
 {
-    private static express = require("express");
-    private static listener = Webserver.express();
+    public static readonly instance: Webserver = new Webserver();
+    private readonly express = require("express");
+    private readonly listener = this.express();
+
+    /** Listening port for webrequests. */
+    private get serverPort(): Number  { return this.listener.get("port");}
 
     /**
-     * Port the server will listen on for webrequests
+     * @summary Initialization procedure of object
      */
-    private get ServerPort(): Number 
+    private constructor()
     {
-        return Webserver.listener.get("port");
+        super();
+        //this.bindViewEngine(this.listener);
+        this.listener.set("port", 80);
+        this.bindViewEngine(this.listener);
+        //this.loadTestFunctions();
     }
 
     /**
-     * Initialization procedure of object
-     */
-    constructor()
-    {
-        Webserver.listener.set("port", 3000);
-        
-        super(Webserver.listener);
-    }
-
-    /**
-     * Start listening for requests
+     * @summary Start listening for requests
      */
     public start(): void
     {
-        /*
-        new Map([
-            ["404", this.sendHtmlContent]
-        ]).forEach((value, key) => {
-            //appendFile.use
-        });
-        */
-        
-        Webserver.listener.get("/", this.sendHtmlContent);
-        Webserver.listener.get("/json", this.sendJsonContent);
-
-        Webserver.listener.use((req: any, res: any) => 
+        try
         {
-            res.type("text/html");
-            res.status("404");
-            res.send("Failed to load webpage...");
-        })
-        
-        Webserver.listener.listen(this.ServerPort, 
-            () => console.log("[server]: http://localhost:"+this.ServerPort));
-    }
-
-    private sendHtmlContent(req: any, res: any)
-    {
-        res.type("text/html");
-        res.send("hello world");
-    }
-
-    private sendJsonContent(req: any, res: any)
-    {
-        res.type("application/json");
-        res.json({});
+            this.listener.listen(this.serverPort, 
+                () => console.log(`[${this.constructor.name}]: listening for requests on port ${this.serverPort}`));
+        } catch(ex)
+        {
+            if(ex instanceof Error)
+                console.log(ex.message);
+        }
     }
 
 
