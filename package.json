@@ -1,0 +1,28 @@
+{
+  "name": "express-js-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "ejs": "^3.1.6",
+    "express": "^4.17.3",
+    "expressjs": "^1.0.1",
+    "file-system": "^2.2.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./Program.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JannickOste/TypescriptServer.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JannickOste/TypescriptServer/issues"
+  },
+  "homepage": "https://github.com/JannickOste/TypescriptServer#readme"
+}

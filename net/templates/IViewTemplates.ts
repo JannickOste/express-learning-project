@@ -2,6 +2,8 @@ import { IViewTemplateModel } from "./IViewTemplateModel";
 
 /**
  * Namespace containing IViewTemplates, used for registering views based on generic type attribute (T).
+ * models must be made in IViewTemplates.ts otherwise they wont be detected, 
+ * todo: look into universal solution..;
  */
 export namespace IViewTemplates {
   type Wrapper < T > = {
@@ -12,10 +14,22 @@ export namespace IViewTemplates {
 
   const viewImplementations: Wrapper < IViewTemplateModel > [] = [];
 
-  export function getViews(): Wrapper < IViewTemplateModel > [] {
+  /**
+   * Get all registered views using the set attribute 
+   * 
+   * @returns IViewTemplateModel array
+   */
+  export function getViews(): Wrapper < IViewTemplateModel > [] 
+  {
     return viewImplementations;
   }
 
+  /**
+   * sets an interface object to the views template stack
+   * 
+   * @param ctor extended type of IViewTemplateModel
+   * @returns IViewTemplateModel wrapper
+   */
   export function set < T extends Wrapper < IViewTemplateModel >> (ctor: T) {
     viewImplementations.push(ctor);
     return ctor;

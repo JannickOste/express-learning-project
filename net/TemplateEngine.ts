@@ -1,8 +1,6 @@
 import path from "path";
-import {
-    fileSystem
-} from "../misc/Globals";
 import { IViewTemplates } from "./templates/IViewTemplates";
+import { Globals } from '../misc/Globals';
 
 
 /**
@@ -66,7 +64,7 @@ export abstract class TemplateEngine {
     private get views(): string[] {
         let out: string[] = [];
 
-        fileSystem.recurseSync(path.join(__dirname, "../", "views"), (filepath: string, relative: string, name: string) => {
+        Globals.fileSystem.recurseSync(path.join(__dirname, "../", "views"), (filepath: string, relative: string, name: string) => {
             if (name && name.endsWith("ejs")) {
                 const filename = path.basename(filepath);
                 const absName = filename.substring(0, filename.length - 4);
