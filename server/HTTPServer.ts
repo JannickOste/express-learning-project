@@ -9,7 +9,7 @@ export class HTTPServer extends TemplateEngine
 {
     public static readonly instance: HTTPServer = new HTTPServer();
     private readonly express = require("express");
-    private readonly listener = this.express();
+    public readonly listener = this.express();
 
     /** Listening port for webrequests. */
     private get serverPort(): Number  { return this.listener.get("port");}
@@ -20,12 +20,20 @@ export class HTTPServer extends TemplateEngine
     private constructor()
     {
         super();
+        this.setupListener();
 
+        this.bindViewEngine(this.listener);
+        this.listener.set("port", 8080);
+    }
 
+    /**
+     * Setup listener configuration
+     */
+    private setupListener() 
+    {
         this.listener.use(this.express.json({limit: "1mb"}));
         this.listener.use(this.express.urlencoded({extended: true}));
-        this.bindViewEngine(this.listener);
-        this.listener.set("port", 80);
+        this.listener.use(this.express.static("public"));
     }
 
     /**

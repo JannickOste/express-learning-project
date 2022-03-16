@@ -38,7 +38,6 @@ export abstract class TemplateEngine {
                 console.log(`/${name}`);
                 if (_interface) {
                     const postCallback = _interface.prototype.post;
-                    
                     if(postCallback !== undefined)
                         listener.post(`/${name}`.replace("index", ""), (req: any, res: any) => {
                             Object.create(_interface.prototype).post(req, res);

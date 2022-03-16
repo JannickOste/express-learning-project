@@ -1,3 +1,10 @@
+/**
+ * IViewTemplate interface object, namespace and implemntations.
+ * 
+ * Implementation have to be implemented in IViewTemplate.ts otherwise they will not be recognized by the namespace.
+ * @!TODO: look for universal solution
+ */
+
 //#region View interface and namespace.
 /**
  * View data interface
@@ -74,7 +81,7 @@ class PostExample
 {
   get(req: any) 
   {
-    return {}
+    return {message: undefined}
   }
 
   post(req: any, res: any)  {
