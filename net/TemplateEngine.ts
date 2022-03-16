@@ -2,9 +2,8 @@ import path from "path";
 import {
     fileSystem
 } from "../misc/Globals";
-import {
-    IViewTemplate
-} from './IViewTemplate';
+import { IViewTemplates } from "./templates/IViewTemplates";
+
 
 /**
  * Class responsible for loading views
@@ -23,16 +22,17 @@ export abstract class TemplateEngine {
     public bindViewEngine(listener: any): void {
         listener.set("view engine", TemplateEngine.viewEngine);
 
-
         // Content pages
         this.views.filter((name: string) => !(/^[0-9]+$/.test(name)))
             .forEach((name: string) => {
-                const _interface = IViewTemplate.getViews()
+                const _interface = IViewTemplates.getViews()
                     .filter(i => i.name.toLowerCase() == name.toLowerCase())[0];
 
+                
                 listener.get(`/${name}`.replace("index", ""),
                     (req: any, res: any) => {
-                        res.render(name, _interface ? _interface.prototype.get(req) : {});
+                        const getCallack: Function | undefined = _interface.prototype.get;
+                        res.render(name, _interface && getCallack ? getCallack(req, res) : {});
                 });
                 
                 console.log(`/${name}`);
@@ -47,15 +47,15 @@ export abstract class TemplateEngine {
 
             });
 
-
-
         // Status pages.
         this.views.filter(n => /^[0-9]+$/.test(n)).forEach(n => {
-            const _interface = IViewTemplate.getViews().filter(i => i.name.toLowerCase() == n.toLowerCase());
+            const _interface = IViewTemplates.getViews().filter(i => i.name.toLowerCase() == n.toLowerCase())[0];
 
             listener.use((req: any, res: any) => {
                 res.status(n);
-                res.render(n, _interface.length > 0 ? _interface[0].prototype.get(req) : {})
+
+                const getCallback: Function | undefined = _interface?.prototype.get; 
+                res.render(n, _interface && getCallback ? getCallback(req, res) : {})
             });
         })
     }

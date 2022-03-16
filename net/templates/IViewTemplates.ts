@@ -1,46 +1,22 @@
-/**
- * IViewTemplate interface object, namespace and implemntations.
- * 
- * Implementation have to be implemented in IViewTemplate.ts otherwise they will not be recognized by the namespace.
- * @!TODO: look for universal solution
- */
-
-//#region View interface and namespace.
-/**
- * View data interface
- */
-export abstract class IViewTemplate {
-  /**
-   * Post method callback
-   * @param request 
-   * @param response
-   */
-  public post: Function | undefined = (req: any, res: any) => undefined;
-
-  /**
-   * Get method callback
-   * @param request 
-   */
-  public abstract get(request: any): object;
-}
+import { IViewTemplateModel } from "./IViewTemplateModel";
 
 /**
  * Namespace containing IViewTemplates, used for registering views based on generic type attribute (T).
  */
-export namespace IViewTemplate {
+export namespace IViewTemplates {
   type Wrapper < T > = {
     new(...args: any[]): T;
 
     readonly prototype: T;
   }
 
-  const viewImplementations: Wrapper < IViewTemplate > [] = [];
+  const viewImplementations: Wrapper < IViewTemplateModel > [] = [];
 
-  export function getViews(): Wrapper < IViewTemplate > [] {
+  export function getViews(): Wrapper < IViewTemplateModel > [] {
     return viewImplementations;
   }
 
-  export function set < T extends Wrapper < IViewTemplate >> (ctor: T) {
+  export function set < T extends Wrapper < IViewTemplateModel >> (ctor: T) {
     viewImplementations.push(ctor);
     return ctor;
   }
@@ -52,7 +28,7 @@ export namespace IViewTemplate {
  * Implementation of IViewTemplate interface in class style. 
  * 
  */
-@IViewTemplate.set
+@IViewTemplates.set
 class Index {
   get(req: any) {
     return {}
@@ -64,7 +40,7 @@ class Index {
  * Implementation of IViewTemplate interface in class style. 
  * 
  */
-@IViewTemplate.set
+@IViewTemplates.set
 class GetExample {
   get(req: any) {
     return {
@@ -76,7 +52,7 @@ class GetExample {
   post = undefined
 } 
 
-@IViewTemplate.set
+@IViewTemplates.set
 class PostExample
 {
   get(req: any) 

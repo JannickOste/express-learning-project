@@ -9,7 +9,7 @@
 
     <style type="text/css">
         table  { width: 100%; }
-        *  {  text-align: left; }
+        *      {  text-align: left; }
     </style>
 </head>
 <body>  
@@ -33,12 +33,13 @@
                 <% } %>
             </td>
         </tr>
-        <tr>
-            <td><a href="/getExample?index=<%= index-1 %>">index--</a></td>
-            <td><a href="/getExample?index=<%= (index+1) %>">index++</a></td>
-        </tr>
     </table>
-    <br />
+    <h2>decrement/increment index</h2>
+    <ul>
+        <li><a href="/getExample?index=<%= index-1 %>">index--</a></li>
+        <li><a href="/getExample?index=<%= (index+1) %>">index++</a></li>
+    </ul>
+    
     <pre>
         class object location: server.IViewTemplate->GetExample
     </pre>

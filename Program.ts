@@ -1,4 +1,4 @@
-import { HTTPServer } from './server/HTTPServer';
+import { HTTPServer } from './net/HTTPServer';
 
 HTTPServer.instance.start();
 
