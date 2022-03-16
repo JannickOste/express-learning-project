@@ -1,5 +1,31 @@
-<% if(person !== undefined) { %>
-    <%= person.name %>
-<% } else { %>
-    Index out of bounds 
-<% } %>
+
+<table style="width: 100%">
+    <caption><h1>GET Request example page</h1></caption>
+    <tr>
+        <th style="text-align: left; font-size: 1.6rem;">Name</th>
+        <th style="text-align: left; font-size: 1.6rem;">Value</th>
+    </tr>
+    <tr>
+        <td>current index: </td>
+        <td><%= index %></td>
+    </tr>
+    <tr>
+        <td>name:</td>
+        <td>
+            <% if(person !== undefined) { %> 
+                <%=  person.name %>
+            <% } else { %>
+                no data found 
+            <% } %>
+        </td>
+    </tr>
+    <tr>
+        <td><a href="/getExample?index=<%= index-1 %>">index--</a></td>
+        <td><a href="/getExample?index=<%= (index+1) %>">index++</a></td>
+    </tr>
+</table>
+<br />
+<pre>
+    class object location: server.IViewTemplate->GetExample
+</pre>
+<p>Go back to homepage <a href="./">click here</a></p>

@@ -1,12 +1,24 @@
+//#region View interface and namespace.
 /**
  * View data interface
  */
-export interface IViewTemplate {
-  getDataObject(request: any): object;
+export abstract class IViewTemplate {
+  /**
+   * Post method callback
+   * @param request 
+   * @param response
+   */
+  public post: Function | undefined = (req: any, res: any) => undefined;
+
+  /**
+   * Get method callback
+   * @param request 
+   */
+  public abstract get(request: any): object;
 }
 
 /**
- * Namespace containing IViewTemplates, used for registering views based on attributes.
+ * Namespace containing IViewTemplates, used for registering views based on generic type attribute (T).
  */
 export namespace IViewTemplate {
   type Wrapper < T > = {
@@ -26,20 +38,20 @@ export namespace IViewTemplate {
     return ctor;
   }
 }
+//#endregion
 
+//#region Page objects
 /**
  * Implementation of IViewTemplate interface in class style. 
  * 
  */
 @IViewTemplate.set
 class Index {
-  getDataObject(req: any) {
-    console.dir(req.query);
-    return {
-      person: req.query.index
-    }
-
+  get(req: any) {
+    return {}
   }
+
+  post = undefined
 }
 /**
  * Implementation of IViewTemplate interface in class style. 
@@ -47,9 +59,28 @@ class Index {
  */
 @IViewTemplate.set
 class GetExample {
-  getDataObject(req: any) {
+  get(req: any) {
     return {
-      person: req.query.index == undefined ? "No person index defined" : [{name: "Jannick Oste"}, {name: "Tom Bom"}][req.query.index]
+      person: req.query.index == undefined ? "No person index defined" : [{name: "Jannick Oste"}, {name: "Tom Bom"}][req.query.index],
+      index: req.query.index == undefined ? -1 : Number.parseInt(req.query.index)
     }
   }
+
+  post = undefined
 } 
+
+@IViewTemplate.set
+class PostExample
+{
+  get(req: any) 
+  {
+    return {}
+  }
+
+  post(req: any, res: any)  {
+    return {
+      message: `Welcome, ${req.body.fname}`
+    }
+  }
+}
+//#endregion

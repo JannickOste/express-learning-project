@@ -21,8 +21,11 @@ export class HTTPServer extends TemplateEngine
     {
         super();
 
-        this.listener.set("port", 80);
+
+        this.listener.use(this.express.json({limit: "1mb"}));
+        this.listener.use(this.express.urlencoded({extended: true}));
         this.bindViewEngine(this.listener);
+        this.listener.set("port", 80);
     }
 
     /**
@@ -41,5 +44,8 @@ export class HTTPServer extends TemplateEngine
         }
     }
 
-
+    public setPostEvent(endpoint: string, event: Function): void 
+    {
+        this.listener.post(endpoint, event);
+    }
 }

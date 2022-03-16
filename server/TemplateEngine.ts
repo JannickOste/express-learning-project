@@ -13,8 +13,8 @@ import {
  * @created 2022/03/16
  */
 export abstract class TemplateEngine {
-    protected static readonly ejs = require("ejs");
-    protected static readonly viewEngine = "ejs";
+    protected static readonly ejs: any = require("ejs");
+    protected static readonly viewEngine: string = "ejs";
 
     /**
      * bind all ejs views based on name to listener foreach content and statuscode.
@@ -25,17 +25,30 @@ export abstract class TemplateEngine {
 
 
         // Content pages
-        this.views.filter(n => !(/^[0-9]+$/.test(n)))
-            .forEach(n => {
-                const _interface = IViewTemplate.getViews().filter(i => i.name.toLowerCase() == n.toLowerCase());
+        this.views.filter((name: string) => !(/^[0-9]+$/.test(name)))
+            .forEach((name: string) => {
+                const _interface = IViewTemplate.getViews()
+                    .filter(i => i.name.toLowerCase() == name.toLowerCase())[0];
 
-                listener.get(`/${n}`.replace("index", ""),
+                listener.get(`/${name}`.replace("index", ""),
                     (req: any, res: any) => {
-                        res.render(n, _interface.length > 0 ? _interface[0].prototype.getDataObject(req) : {});
-
-                    });
+                        res.render(name, _interface ? _interface.prototype.get(req) : {});
+                });
+                
+                console.log(`/${name}`);
+                if (_interface) {
+                    const postCallback = _interface.prototype.post;
+                    
+                    if(postCallback !== undefined)
+                        listener.post(`/${name}`.replace("index", ""), (req: any, res: any) => {
+                            Object.create(_interface.prototype).post(req, res);
+                            res.render(name, _interface ? postCallback(req, res) : {});
+                        });
+                }
 
             });
+
+
 
         // Status pages.
         this.views.filter(n => /^[0-9]+$/.test(n)).forEach(n => {
@@ -43,7 +56,7 @@ export abstract class TemplateEngine {
 
             listener.use((req: any, res: any) => {
                 res.status(n);
-                res.render(n, _interface.length > 0 ? _interface[0].prototype.getDataObject(req) : {})
+                res.render(n, _interface.length > 0 ? _interface[0].prototype.get(req) : {})
             });
         })
     }
