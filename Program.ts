@@ -1,4 +1,4 @@
-import { Webserver } from './WebServer';
+import { HTTPServer } from './server/HTTPServer';
 
-Webserver.instance.start();
+HTTPServer.instance.start();
 

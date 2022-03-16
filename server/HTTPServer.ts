@@ -1,14 +1,13 @@
-import { appendFile } from "fs";
 import { TemplateEngine } from './TemplateEngine';
-import { IncomingMessage, ServerResponse } from 'http';
 
 /**
- * 
+ * Webserver object
  * @author Oste Jannick.
+ * @created 2022/03/15
  */
-export class Webserver extends TemplateEngine
+export class HTTPServer extends TemplateEngine
 {
-    public static readonly instance: Webserver = new Webserver();
+    public static readonly instance: HTTPServer = new HTTPServer();
     private readonly express = require("express");
     private readonly listener = this.express();
 
@@ -16,19 +15,18 @@ export class Webserver extends TemplateEngine
     private get serverPort(): Number  { return this.listener.get("port");}
 
     /**
-     * @summary Initialization procedure of object
+     * Initialization procedure of object
      */
     private constructor()
     {
         super();
-        //this.bindViewEngine(this.listener);
+
         this.listener.set("port", 80);
         this.bindViewEngine(this.listener);
-        //this.loadTestFunctions();
     }
 
     /**
-     * @summary Start listening for requests
+     * Start listening for requests
      */
     public start(): void
     {
