@@ -11,14 +11,13 @@ import { Globals } from '../misc/Globals';
  */
 export abstract class TemplateEngine {
     protected static readonly ejs: any = require("ejs");
-    protected static readonly viewEngine: string = "ejs";
 
     /**
      * bind all ejs views based on name to listener foreach content and statuscode.
      * @param listener websocket
      */
     public bindViewEngine(listener: any): void {
-        listener.set("view engine", TemplateEngine.viewEngine);
+        listener.set("view engine", "ejs");
 
         // Content pages
         this.views.filter((name: string) => !(/^[0-9]+$/.test(name)))
@@ -33,7 +32,6 @@ export abstract class TemplateEngine {
                         res.render(name, _interface && getCallack ? getCallack(req, res) : {});
                 });
                 
-                console.log(`/${name}`);
                 if (_interface) {
                     const postCallback = _interface.prototype.post;
                     if(postCallback !== undefined)

@@ -1,6 +1,4 @@
 import { TemplateEngine } from './TemplateEngine';
-import *  as exp from "express";
-
 /**
  * Webserver object
  * @author Oste Jannick.
@@ -9,11 +7,16 @@ import *  as exp from "express";
 export class HTTPServer extends TemplateEngine
 {
     public static readonly instance: HTTPServer = new HTTPServer();
+
     private readonly express = require("express");
-    public readonly listener = this.express();
+    private readonly listener = this.express();
 
     /** Listening port for webrequests. */
-    private get serverPort(): Number  { return this.listener.get("port");}
+    public get serverPort(): Number  { return this.listener.get("port");}
+    public get viewEngine(): string { return this.listener.get("view engine");}
+
+    public get serverName(): string { return this.listener.locals.title; }
+    public set serverName(value: string) { this.listener.locals.title = value;}
 
     /**
      * Initialization procedure of object
@@ -22,7 +25,7 @@ export class HTTPServer extends TemplateEngine
     {
         super();
         this.setupListener();
-        
+        console.log(this.listener.mountpath)
         this.bindViewEngine(this.listener);
         this.listener.set("port", 8080);
     }
@@ -32,9 +35,12 @@ export class HTTPServer extends TemplateEngine
      */
     private setupListener(): void
     {
+        this.serverName = "ExpressJS server";
+
         this.listener.use(this.express.json({limit: "1mb"}));
         this.listener.use(this.express.urlencoded({extended: true}));
         this.listener.use(this.express.static("public"));
+
     }
 
     /**
