@@ -5,7 +5,7 @@ import { IViewTemplateModel } from "./IViewTemplateModel";
  * models must be made in IViewTemplates.ts otherwise they wont be detected, 
  * todo: look into universal solution..;
  */
-export namespace IViewTemplates {
+export namespace ViewTemplates {
   type Wrapper < T > = {
     new(...args: any[]): T;
 
@@ -42,7 +42,7 @@ export namespace IViewTemplates {
  * Implementation of IViewTemplate interface in class style. 
  * 
  */
-@IViewTemplates.set
+@ViewTemplates.set
 class Index {
   get(req: any) {
     return {}
@@ -54,7 +54,7 @@ class Index {
  * Implementation of IViewTemplate interface in class style. 
  * 
  */
-@IViewTemplates.set
+@ViewTemplates.set
 class GetExample {
   get(req: any) {
     return {
@@ -66,7 +66,7 @@ class GetExample {
   post = undefined
 } 
 
-@IViewTemplates.set
+@ViewTemplates.set
 class PostExample
 {
   get(req: any) 

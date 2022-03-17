@@ -1,5 +1,5 @@
 import path from "path";
-import { IViewTemplates } from "./templates/IViewTemplates";
+import { ViewTemplates } from "./templates/ViewTemplates";
 import { Globals } from '../misc/Globals';
 
 
@@ -23,7 +23,7 @@ export abstract class TemplateEngine {
         // Content pages
         this.views.filter((name: string) => !(/^[0-9]+$/.test(name)))
             .forEach((name: string) => {
-                const _interface = IViewTemplates.getViews()
+                const _interface = ViewTemplates.getViews()
                     .filter(i => i.name.toLowerCase() == name.toLowerCase())[0];
 
                 
@@ -47,7 +47,7 @@ export abstract class TemplateEngine {
 
         // Status pages.
         this.views.filter(n => /^[0-9]+$/.test(n)).forEach(n => {
-            const _interface = IViewTemplates.getViews().filter(i => i.name.toLowerCase() == n.toLowerCase())[0];
+            const _interface = ViewTemplates.getViews().filter(i => i.name.toLowerCase() == n.toLowerCase())[0];
 
             listener.use((req: any, res: any) => {
                 res.status(n);
