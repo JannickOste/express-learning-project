@@ -1,4 +1,5 @@
 import { TemplateEngine } from './TemplateEngine';
+import *  as exp from "express";
 
 /**
  * Webserver object
@@ -21,7 +22,7 @@ export class HTTPServer extends TemplateEngine
     {
         super();
         this.setupListener();
-
+        
         this.bindViewEngine(this.listener);
         this.listener.set("port", 8080);
     }
@@ -29,7 +30,7 @@ export class HTTPServer extends TemplateEngine
     /**
      * Setup listener configuration
      */
-    private setupListener() 
+    private setupListener(): void
     {
         this.listener.use(this.express.json({limit: "1mb"}));
         this.listener.use(this.express.urlencoded({extended: true}));
