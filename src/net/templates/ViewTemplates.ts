@@ -1,4 +1,6 @@
+import { IWebResponse } from '../IWebResponse';
 import { IViewTemplateModel } from "./IViewTemplateModel";
+import { NextFunction } from 'express';
 
 /**
  * Namespace containing IViewTemplates, used for registering views based on generic type attribute (T).
@@ -44,11 +46,11 @@ export namespace ViewTemplates {
  */
 @ViewTemplates.set
 class Index {
-  get(req: any) {
-    return {}
+  get(req: Request, res: Response, next: NextFunction): IWebResponse {
+    return {data:{}}
   }
 
-  post = undefined
+  post = undefined;
 }
 /**
  * Implementation of IViewTemplate interface in class style. 
@@ -56,28 +58,43 @@ class Index {
  */
 @ViewTemplates.set
 class GetExample {
-  get(req: any) {
-    return {
-      person: req.query.index == undefined ? "No person index defined" : [{name: "Jannick Oste"}, {name: "Tom Bom"}][req.query.index],
-      index: req.query.index == undefined ? -1 : Number.parseInt(req.query.index)
-    }
+  get(req: Request, res: Response, next: NextFunction): IWebResponse {
+    const index: number = Number.parseInt(`${(req as any).query.index}`);
+
+    return {data: {
+      person: isNaN(index) ? "No person index defined" : [{name: "Jannick Oste"}, {name: "Tom Bom"}][index],
+      index: isNaN(index) ? -1 : index
+    }}
   }
 
-  post = undefined
+  post = undefined;
 } 
 
 @ViewTemplates.set
 class PostExample
 {
-  get(req: any) 
+  get(req: Request, res: Response, next: NextFunction): IWebResponse 
   {
-    return {message: undefined}
+    const response: IWebResponse = {
+      data:
+      {
+        message: undefined
+      }
+    }
+
+    return response;
   }
 
-  post(req: any, res: any)  {
-    return {
-      message: `Welcome, ${req.body.fname}`
+  public post(req: any, res: any, next: NextFunction): IWebResponse
+  {
+    const response: IWebResponse = {
+      data:
+      {
+        message: `<h2>Welcome, ${(req.body as any).fname}</h2>`
+      }
     }
+
+    return response;
   }
 }
 //#endregion

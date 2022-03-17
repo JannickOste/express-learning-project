@@ -17,12 +17,13 @@
         }
     </style>
 </head>
+
 <body>
     <form action="/postExample" method="post" style="width: 100%;">
         <table>
             <caption>
                 <h1>POST Request example</h1>
-                <h2 height="2rem"><%=message%></h2>
+                <%- data["message"] %>
             </caption>
     
             <tr>
@@ -45,6 +46,7 @@
     <pre>
         class object: server.IViewTemplate->PostExample
     </pre>
+    
     <p>Go back to homepage <a href="./">click here</a></p>
 </body>
 </html>

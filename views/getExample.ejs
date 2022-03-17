@@ -21,13 +21,13 @@
         </tr>
         <tr>
             <td>current index: </td>
-            <td><%= index %></td>
+            <td><%= data["index"] %></td>
         </tr>
         <tr>
             <td>name:</td>
             <td>
-                <% if(person !== undefined) { %> 
-                    <%=  person.name %>
+                <% if(data["person"] !== undefined) { %> 
+                    <%=  data["person"].name %>
                 <% } else { %>
                     no data found 
                 <% } %>
@@ -36,8 +36,8 @@
     </table>
     <h2>decrement/increment index</h2>
     <ul>
-        <li><a href="/getExample?index=<%= index-1 %>">index--</a></li>
-        <li><a href="/getExample?index=<%= (index+1) %>">index++</a></li>
+        <li><a href='/getExample?index=<%= data["index"]-1 %>'>index--</a></li>
+        <li><a href='/getExample?index=<%= data["index"]+1 %>'>index++</a></li>
     </ul>
     
     <pre>

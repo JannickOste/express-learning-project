@@ -4,12 +4,12 @@ import { Globals } from '../misc/Globals';
 
 
 /**
- * Class responsible for loading views
+ * Service responsible for loading view data and registering endpoints.
  * 
  * @author Oste Jannick
  * @created 2022/03/16
  */
-export abstract class TemplateEngine {
+export abstract class ViewService {
     protected static readonly ejs: any = require("ejs");
 
     /**
@@ -33,12 +33,20 @@ export abstract class TemplateEngine {
                 });
                 
                 if (_interface) {
-                    const postCallback = _interface.prototype.post;
-                    if(postCallback !== undefined)
-                        listener.post(`/${name}`.replace("index", ""), (req: any, res: any) => {
-                            Object.create(_interface.prototype).post(req, res);
-                            res.render(name, _interface ? postCallback(req, res) : {});
-                        });
+                    {
+                        const postCallback = _interface.prototype.post;
+                        if(name == "postExample")
+                            console.dir(_interface.prototype);
+                        if(postCallback !== undefined)
+                        {
+                            console.log("hello world");
+                            listener.post(`/${name}`.replace("index", ""), (req: any, res: any, next: any) => {
+                                Object.create(_interface.prototype).post(req, res);
+                                res.render(name, _interface ? postCallback(req, res, next) : {});
+                            });
+                        }
+                    }
+
                 }
 
             });

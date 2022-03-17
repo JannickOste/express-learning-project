@@ -1,5 +1,5 @@
 import { StringTools } from "./misc/StringTools";
-import { HTTPServer } from "./net/HTTPServer";
+import { HTTPServer } from "./net/WebServer";
 
 console.log(StringTools.htmlspecialchars("&&&&&&&&&&"));
 

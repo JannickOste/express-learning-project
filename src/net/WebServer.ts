@@ -1,10 +1,10 @@
-import { TemplateEngine } from './TemplateEngine';
+import { ViewService } from './ViewService';
 /**
  * Webserver object
  * @author Oste Jannick.
  * @created 2022/03/15
  */
-export class HTTPServer extends TemplateEngine
+export class HTTPServer extends ViewService
 {
     public static readonly instance: HTTPServer = new HTTPServer();
 
@@ -15,8 +15,10 @@ export class HTTPServer extends TemplateEngine
     public get serverPort(): Number  { return this.listener.get("port");}
     public get viewEngine(): string { return this.listener.get("view engine");}
 
-    public get serverName(): string { return this.listener.locals.title; }
-    public set serverName(value: string) { this.listener.locals.title = value;}
+    public get serverInfo(): object  { return this.listener.locals.info; }
+
+    public get serverName(): string { return this.listener.locals.info.title; }
+    public set serverName(value: string) { this.listener.locals.info.title = value;}
 
     /**
      * Initialization procedure of object
@@ -35,8 +37,11 @@ export class HTTPServer extends TemplateEngine
      */
     private setupListener(): void
     {
+        this.listener.locals.info = {
+            author: "Oste Jannick"
+        } 
+        
         this.serverName = "ExpressJS server";
-
         this.listener.use(this.express.json({limit: "1mb"}));
         this.listener.use(this.express.urlencoded({extended: true}));
         this.listener.use(this.express.static("public"));
@@ -48,6 +53,7 @@ export class HTTPServer extends TemplateEngine
      */
     public start(): void
     {
+        console.dir(this.serverInfo)
         try
         {
             this.listener.listen(this.serverPort, 
