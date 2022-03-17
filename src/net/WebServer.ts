@@ -27,7 +27,6 @@ export class HTTPServer extends ViewService
     {
         super();
         this.setupListener();
-        console.log(this.listener.mountpath)
         this.bindViewEngine(this.listener);
         this.listener.set("port", 8080);
     }
@@ -40,7 +39,7 @@ export class HTTPServer extends ViewService
         this.listener.locals.info = {
             author: "Oste Jannick"
         } 
-        
+
         this.serverName = "ExpressJS server";
         this.listener.use(this.express.json({limit: "1mb"}));
         this.listener.use(this.express.urlencoded({extended: true}));

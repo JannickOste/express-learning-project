@@ -46,7 +46,7 @@ export namespace ViewTemplates {
  */
 @ViewTemplates.set
 class Index {
-  get(req: Request, res: Response, next: NextFunction): IWebResponse {
+  get(req: Request, res: Response, next: NextFunction): IWebResponse  {
     return {data:{}}
   }
 

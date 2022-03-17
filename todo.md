@@ -1,2 +1,3 @@
 # !TODO: 
-- Add data sanitatization 
+- Add data sanitization 
+- Add IWebRequest implementation for GET Requests.

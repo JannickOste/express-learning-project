@@ -13,13 +13,22 @@ export abstract class ViewService {
     protected static readonly ejs: any = require("ejs");
 
     /**
-     * bind all ejs views based on name to listener foreach content and statuscode.
+     * @description bind all ejs views based on name to listener foreach content and statuscode.
      * @param listener websocket
+     * 
+     * @psuedocode bindViewEngine
+     * - Set view engine to ejs 
+     * - Fetch all views from views folder and iterate over each name to 
+     *      fetch all numerical (status pages) & non-numerical (content pages) 
+     * - foreach content page fetch name and use as this as the current value
+     * - attempt to fetch an interface of the same name, from the ViewTemplates namespace (none case sensitive).
+     * - (if interface found): attempt to fetch a get callback from and apply to endpoint, otherwise return empty object
+     * - (if interface found): attempt to get post callback and bind to same endpoint.
+     * - Set status pages
      */
     public bindViewEngine(listener: any): void {
         listener.set("view engine", "ejs");
 
-        // Content pages
         this.views.filter((name: string) => !(/^[0-9]+$/.test(name)))
             .forEach((name: string) => {
                 const _interface = ViewTemplates.getViews()
@@ -51,7 +60,6 @@ export abstract class ViewService {
 
             });
 
-        // Status pages.
         this.views.filter(n => /^[0-9]+$/.test(n)).forEach(n => {
             const _interface = ViewTemplates.getViews().filter(i => i.name.toLowerCase() == n.toLowerCase())[0];
 
@@ -66,11 +74,17 @@ export abstract class ViewService {
 
     /**
      * fetch all ejs templates from views folder
+     * 
+     * @psuedocode views
+     * - fetches the projectRoot from the Globals class. 
+     * - Scans recursivly over the views folder for .ejs files (View templates)
+     * - if view found, sanitizes to its absolute name and adds the name to return stack.
+     * - return found ejs views
      */
     private get views(): string[] {
         let out: string[] = [];
 
-        Globals.fileSystem.recurseSync(path.join(__dirname, "../../", "views"), (filepath: string, relative: string, name: string) => {
+        Globals.fileSystem.recurseSync(path.join(Globals.projectRoot, "views"), (filepath: string, relative: string, name: string) => {
             if (name && name.endsWith("ejs")) {
                 const filename = path.basename(filepath);
                 const absName = filename.substring(0, filename.length - 4);

@@ -1,5 +1,4 @@
 import { IWebRequest } from '../IWebRequest';
-import { IWebResponse } from '../IWebResponse';
 /**
  * IViewTemplate interface object, namespace and implemntations.
  * 
@@ -14,8 +13,6 @@ import { IWebResponse } from '../IWebResponse';
  export abstract class IViewTemplateModel {
     /**
      * Post method callback
-     * @param request 
-     * @param response
      */
     public abstract post: IWebRequest | undefined;
   
@@ -23,6 +20,6 @@ import { IWebResponse } from '../IWebResponse';
      * Get method callback
      * @param request 
      */
-    public get: Function | undefined = (req: any, res: any): object | undefined => undefined;
-  } 
+    public abstract get: Function | undefined;
+} 
   
