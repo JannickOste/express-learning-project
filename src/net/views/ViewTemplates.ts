@@ -1,6 +1,6 @@
-import { IWebResponse } from '../IWebResponse';
-import { IViewTemplateModel } from "./IViewTemplateModel";
 import { NextFunction } from 'express';
+import { IViewTemplate } from '../interfaces/IViewTemplate';
+import { IWebResponse } from '../interfaces/IWebResponse';
 
 /**
  * Namespace containing IViewTemplates, used for registering views based on generic type attribute (T).
@@ -14,14 +14,14 @@ export namespace ViewTemplates {
     readonly prototype: T;
   }
 
-  const viewImplementations: Wrapper < IViewTemplateModel > [] = [];
+  const viewImplementations: Wrapper < IViewTemplate > [] = [];
 
   /**
    * Get all registered views using the set attribute 
    * 
    * @returns IViewTemplateModel array
    */
-  export function getViews(): Wrapper < IViewTemplateModel > [] 
+  export function getViews(): Wrapper < IViewTemplate > [] 
   {
     return viewImplementations;
   }
@@ -32,7 +32,7 @@ export namespace ViewTemplates {
    * @param ctor extended type of IViewTemplateModel
    * @returns IViewTemplateModel wrapper
    */
-  export function set < T extends Wrapper < IViewTemplateModel >> (ctor: T) {
+  export function set < T extends Wrapper < IViewTemplate >> (ctor: T) {
     viewImplementations.push(ctor);
     return ctor;
   }
@@ -97,4 +97,6 @@ class PostExample
     return response;
   }
 }
+
+const dset: IViewTemplate[] = [new PostExample()]
 //#endregion

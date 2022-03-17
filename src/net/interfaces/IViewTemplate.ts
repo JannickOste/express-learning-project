@@ -1,4 +1,4 @@
-import { IWebRequest } from '../IWebRequest';
+import { IWebRequest } from './IWebRequest';
 /**
  * IViewTemplate interface object, namespace and implemntations.
  * 
@@ -10,7 +10,7 @@ import { IWebRequest } from '../IWebRequest';
 /**
  * View data interface
  */
- export abstract class IViewTemplateModel {
+ export abstract class IViewTemplate {
     /**
      * Post method callback
      */

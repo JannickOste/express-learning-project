@@ -1,24 +1,27 @@
-import { ViewService } from './ViewService';
+import { ViewService } from './views/ViewService';
+import express from "express";
 /**
  * Webserver object
  * @author Oste Jannick.
  * @created 2022/03/15
  */
-export class HTTPServer extends ViewService
+export class WebServer extends ViewService
 {
-    public static readonly instance: HTTPServer = new HTTPServer();
+    public static readonly instance: WebServer = new WebServer();
 
-    private readonly express = require("express");
-    private readonly listener = this.express();
+    private readonly listener = express();
 
     /** Listening port for webrequests. */
     public get serverPort(): Number  { return this.listener.get("port");}
     public get viewEngine(): string { return this.listener.get("view engine");}
+    public set viewEngine(value: string) { this.listener.set("view engine", value);};
 
     public get serverInfo(): object  { return this.listener.locals.info; }
 
     public get serverName(): string { return this.listener.locals.info.title; }
     public set serverName(value: string) { this.listener.locals.info.title = value;}
+
+
 
     /**
      * Initialization procedure of object
@@ -27,7 +30,6 @@ export class HTTPServer extends ViewService
     {
         super();
         this.setupListener();
-        this.bindViewEngine(this.listener);
         this.listener.set("port", 8080);
     }
 
@@ -41,9 +43,9 @@ export class HTTPServer extends ViewService
         } 
 
         this.serverName = "ExpressJS server";
-        this.listener.use(this.express.json({limit: "1mb"}));
-        this.listener.use(this.express.urlencoded({extended: true}));
-        this.listener.use(this.express.static("public"));
+        this.listener.use(express.json({limit: "1mb"}));
+        this.listener.use(express.urlencoded({extended: true}));
+        this.listener.use(express.static("public"));
 
     }
 
@@ -52,9 +54,9 @@ export class HTTPServer extends ViewService
      */
     public start(): void
     {
-        console.dir(this.serverInfo)
         try
         {
+            this.bindViewEngine();
             this.listener.listen(this.serverPort, 
                 () => console.log(`[${this.constructor.name}]: listening for requests on port ${this.serverPort}`));
         } catch(ex)
@@ -64,8 +66,18 @@ export class HTTPServer extends ViewService
         }
     }
 
-    public setPostEvent(endpoint: string, event: Function): void 
+    public registerPostEndpoint(endpoint: string, event: Function): void 
     {
-        this.listener.post(endpoint, event);
+        this.listener.post(endpoint, event as any);
+    }
+
+    public registerGetEndpoint(endpoint: string, event: Function): void 
+    {
+        this.listener.get(endpoint, event as any);
+    }
+
+    public setMiddleware(event: Function): void 
+    {
+        this.listener.use(event as any);
     }
 }

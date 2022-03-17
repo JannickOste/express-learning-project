@@ -1,7 +1,7 @@
 import path from "path";
-import { ViewTemplates } from "./templates/ViewTemplates";
-import { Globals } from '../misc/Globals';
-
+import { ViewTemplates } from "./ViewTemplates";
+import { Globals } from '../../misc/Globals';
+import { WebServer } from "../WebServer";
 
 /**
  * Service responsible for loading view data and registering endpoints.
@@ -26,16 +26,15 @@ export abstract class ViewService {
      * - (if interface found): attempt to get post callback and bind to same endpoint.
      * - Set status pages
      */
-    public bindViewEngine(listener: any): void {
-        listener.set("view engine", "ejs");
+    public bindViewEngine(): void {
+        WebServer.instance.viewEngine = "ejs";
 
         this.views.filter((name: string) => !(/^[0-9]+$/.test(name)))
             .forEach((name: string) => {
                 const _interface = ViewTemplates.getViews()
                     .filter(i => i.name.toLowerCase() == name.toLowerCase())[0];
 
-                
-                listener.get(`/${name}`.replace("index", ""),
+                WebServer.instance.registerGetEndpoint(`/${name}`.replace("index", ""),
                     (req: any, res: any) => {
                         const getCallack: Function | undefined = _interface.prototype.get;
                         res.render(name, _interface && getCallack ? getCallack(req, res) : {});
@@ -48,22 +47,21 @@ export abstract class ViewService {
                             console.dir(_interface.prototype);
                         if(postCallback !== undefined)
                         {
-                            console.log("hello world");
-                            listener.post(`/${name}`.replace("index", ""), (req: any, res: any, next: any) => {
-                                Object.create(_interface.prototype).post(req, res);
-                                res.render(name, _interface ? postCallback(req, res, next) : {});
-                            });
+                            WebServer.instance.registerPostEndpoint(`/${name}`.replace("index", ""),
+                                (req: any, res: any, next: any) => {
+                                    Object.create(_interface.prototype).post(req, res);
+                                    res.render(name, _interface ? postCallback(req, res, next) : {});
+                                }
+                            );
                         }
                     }
-
                 }
-
             });
 
         this.views.filter(n => /^[0-9]+$/.test(n)).forEach(n => {
             const _interface = ViewTemplates.getViews().filter(i => i.name.toLowerCase() == n.toLowerCase())[0];
-
-            listener.use((req: any, res: any) => {
+            
+            WebServer.instance.setMiddleware((req: any, res: any) => {
                 res.status(n);
 
                 const getCallback: Function | undefined = _interface?.prototype.get; 
