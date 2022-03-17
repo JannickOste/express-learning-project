@@ -64,7 +64,7 @@ export abstract class TemplateEngine {
     private get views(): string[] {
         let out: string[] = [];
 
-        Globals.fileSystem.recurseSync(path.join(__dirname, "../", "views"), (filepath: string, relative: string, name: string) => {
+        Globals.fileSystem.recurseSync(path.join(__dirname, "../../", "views"), (filepath: string, relative: string, name: string) => {
             if (name && name.endsWith("ejs")) {
                 const filename = path.basename(filepath);
                 const absName = filename.substring(0, filename.length - 4);

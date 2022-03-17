@@ -12,7 +12,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "start": "ts-node ./Program.ts",
+    "start": "ts-node ./src/Program.ts",
     "install": "tsc --init --experimentalDecorators && npm install --save @types/node && npm install --save express && npm install --save file-system && npm install --save ejs"
   },
   "repository": {
