@@ -2,6 +2,7 @@ import path from "path";
 import { ViewTemplates } from "./ViewTemplates";
 import { Globals } from '../../misc/Globals';
 import { WebServer } from "../WebServer";
+import { Logger } from '../../misc/Logger';
 
 /**
  * Service responsible for loading view data and registering endpoints.
@@ -27,6 +28,7 @@ export abstract class ViewService {
      * - Set status pages
      */
     public bindViewEngine(): void {
+        Logger.log("Loading view data...");
         WebServer.instance.viewEngine = "ejs";
 
         this.views.filter((name: string) => !(/^[0-9]+$/.test(name)))
@@ -43,8 +45,6 @@ export abstract class ViewService {
                 if (_interface) {
                     {
                         const postCallback = _interface.prototype.post;
-                        if(name == "postExample")
-                            console.dir(_interface.prototype);
                         if(postCallback !== undefined)
                         {
                             WebServer.instance.registerPostEndpoint(`/${name}`.replace("index", ""),

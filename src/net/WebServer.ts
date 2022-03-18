@@ -1,5 +1,7 @@
 import { ViewService } from './views/ViewService';
 import express from "express";
+import { postExample } from './views/ViewTemplates';
+import { Logger } from '../misc/Logger';
 /**
  * Webserver object
  * @author Oste Jannick.
@@ -64,6 +66,7 @@ export class WebServer extends ViewService
      */
     public start(): void
     {
+        Logger.log("Starting WebServer...");
         try
         {
             this.bindViewEngine();
@@ -80,10 +83,12 @@ export class WebServer extends ViewService
      * Register a POST callback for a specific endpoint to the listener
      * 
      * @param endpoint absolute path on the server
-     * @param event 
+     * @param event callback on POST request for endpoint
      */
     public registerPostEndpoint(endpoint: string, event: Function): void 
     {
+        Logger.log(`Attempting to assign POST callback to: ${endpoint}`);
+
         this.listener.post(endpoint, event as any);
     }
 
@@ -95,6 +100,8 @@ export class WebServer extends ViewService
      */
     public registerGetEndpoint(endpoint: string, event: Function): void 
     {
+        Logger.log(`Attempting to assign GET callback to: ${endpoint}`);
+
         this.listener.get(endpoint, event as any);
     }
 

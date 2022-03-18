@@ -70,6 +70,22 @@ class GetExample {
   post = undefined;
 } 
 
+export const postExample: IViewTemplate = {
+  post: undefined,
+  get: (req: Request, res: Response, next: NextFunction) =>
+  {
+    console.log("posted from new post");
+    const response: IWebResponse = {
+      data:
+      {
+        message: undefined
+      }
+    }
+
+    return response;
+  }
+}
+
 @ViewTemplates.set
 class PostExample
 {
@@ -98,5 +114,4 @@ class PostExample
   }
 }
 
-const dset: IViewTemplate[] = [new PostExample()]
 //#endregion
