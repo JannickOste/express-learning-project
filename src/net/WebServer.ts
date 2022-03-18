@@ -21,10 +21,10 @@ export class WebServer extends ViewService
     public get serverName(): string { return this.listener.locals.info.title; }
     public set serverName(value: string) { this.listener.locals.info.title = value;}
 
-
-
     /**
      * Initialization procedure of object
+     * - Initialize base class
+     * - Configure server listener
      */
     private constructor()
     {
@@ -60,6 +60,7 @@ export class WebServer extends ViewService
 
     /**
      * Start listening for requests
+     * 
      */
     public start(): void
     {
@@ -77,6 +78,7 @@ export class WebServer extends ViewService
 
     /**
      * Register a POST callback for a specific endpoint to the listener
+     * 
      * @param endpoint absolute path on the server
      * @param event 
      */
@@ -87,6 +89,7 @@ export class WebServer extends ViewService
 
     /**
      * Register a GET callback for a specific endpoint to the listener
+     * 
      * @param endpoint 
      * @param event 
      */

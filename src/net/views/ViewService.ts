@@ -71,7 +71,7 @@ export abstract class ViewService {
     }
 
     /**
-     * fetch all ejs templates from views folder
+     * fetch all ejs templates from views folder under root.
      * 
      * @psuedocode views
      * - fetches the projectRoot from the Globals class. 
