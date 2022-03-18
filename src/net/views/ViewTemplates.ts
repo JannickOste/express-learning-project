@@ -1,6 +1,7 @@
 import { NextFunction } from 'express';
 import { IViewTemplate } from '../interfaces/IViewTemplate';
 import { IWebResponse } from '../interfaces/IWebResponse';
+import { IWebRequest } from '../interfaces/IWebRequest';
 
 /**
  * Namespace containing IViewTemplates, used for registering views based on generic type attribute (T).
@@ -46,50 +47,37 @@ export namespace ViewTemplates {
  */
 @ViewTemplates.set
 class Index {
-  get(req: Request, res: Response, next: NextFunction): IWebResponse  {
+  get: IWebRequest = (req, res, next): IWebResponse => {
     return {data:{}}
   }
 
   post = undefined;
 }
+
 /**
  * Implementation of IViewTemplate interface in class style. 
  * 
  */
 @ViewTemplates.set
 class GetExample {
-  get(req: Request, res: Response, next: NextFunction): IWebResponse {
+  get: IWebRequest = (req, res, next): IWebResponse => {
     const index: number = Number.parseInt(`${(req as any).query.index}`);
 
-    return {data: {
-      person: isNaN(index) ? "No person index defined" : [{name: "Jannick Oste"}, {name: "Tom Bom"}][index],
-      index: isNaN(index) ? -1 : index
-    }}
+    return {
+      data: {
+        person: isNaN(index) ? "No person index defined" : [{name: "Jannick Oste"}, {name: "Tom Bom"}][index],
+        index: isNaN(index) ? -1 : index
+      }
+    }
   }
 
   post = undefined;
 } 
 
-export const postExample: IViewTemplate = {
-  post: undefined,
-  get: (req: Request, res: Response, next: NextFunction) =>
-  {
-    console.log("posted from new post");
-    const response: IWebResponse = {
-      data:
-      {
-        message: undefined
-      }
-    }
-
-    return response;
-  }
-}
-
 @ViewTemplates.set
 class PostExample
 {
-  get(req: Request, res: Response, next: NextFunction): IWebResponse 
+  get: IWebRequest = (req, res, next): IWebResponse =>
   {
     const response: IWebResponse = {
       data:
@@ -101,12 +89,12 @@ class PostExample
     return response;
   }
 
-  public post(req: any, res: any, next: NextFunction): IWebResponse
+  post: IWebRequest = (req, res, next): IWebResponse =>
   {
     const response: IWebResponse = {
       data:
       {
-        message: `<h2>Welcome, ${(req.body as any).fname}</h2>`
+        message: `<h2>Welcome, ${(req as any).body.fname}</h2>`
       }
     }
 

@@ -17,7 +17,7 @@ export abstract class ViewService {
      * @description bind all ejs views based on name to listener foreach content and statuscode.
      * @param listener websocket
      * 
-     * @psuedocode bindViewEngine
+     * @psuedocode setupViews
      * - Set view engine to ejs 
      * - Fetch all views from views folder and iterate over each name to 
      *      fetch all numerical (status pages) & non-numerical (content pages) 
@@ -27,7 +27,7 @@ export abstract class ViewService {
      * - (if interface found): attempt to get post callback and bind to same endpoint.
      * - Set status pages
      */
-    public bindViewEngine(): void {
+    public static setupViews(): void {
         Logger.log("Loading view data...");
         WebServer.instance.viewEngine = "ejs";
 
@@ -70,6 +70,7 @@ export abstract class ViewService {
         })
     }
 
+
     /**
      * fetch all ejs templates from views folder under root.
      * 
@@ -79,7 +80,7 @@ export abstract class ViewService {
      * - if view found, sanitizes to its absolute name and adds the name to return stack.
      * - return found ejs views
      */
-    private get views(): string[] {
+    private static get views(): string[] {
         let out: string[] = [];
 
         Globals.fileSystem.recurseSync(path.join(Globals.projectRoot, "views"), (filepath: string, relative: string, name: string) => {
