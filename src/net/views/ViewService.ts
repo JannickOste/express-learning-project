@@ -20,7 +20,7 @@ export abstract class ViewService {
      * - Set view engine to ejs 
      * - Fetch all views from views folder and iterate over each name to 
      *      fetch all numerical (status pages) & non-numerical (content pages) 
-     * - foreach content page fetch name and use as this as the current value
+     * - foreach content page fetch name and use as this as the current value in iteration loop
      * - attempt to fetch an interface of the same name, from the ViewTemplates namespace (none case sensitive).
      * - (if interface found): attempt to fetch a get callback from and apply to endpoint, otherwise return empty object
      * - (if interface found): attempt to get post callback and bind to same endpoint.

@@ -29,14 +29,22 @@ export class WebServer extends ViewService
     private constructor()
     {
         super();
+        
         this.setupListener();
-        this.listener.set("port", 8080);
     }
 
     /**
      * Setup listener configuration
+     * 
+     * @psuedocode setupListener
+     * - Create accesibble server info object.
+     * - Assign default serverName
+     * - Set JSON based request processing with a cap of 1mb.
+     * - Set url based endoding processing.
+     * - Set asset folder to public
+     * - Set port to default port
      */
-    private setupListener(): void
+    private setupListener({assetsFolder = "public", port = 8080} = {}): void
     {
         this.listener.locals.info = {
             author: "Oste Jannick"
@@ -45,8 +53,9 @@ export class WebServer extends ViewService
         this.serverName = "ExpressJS server";
         this.listener.use(express.json({limit: "1mb"}));
         this.listener.use(express.urlencoded({extended: true}));
-        this.listener.use(express.static("public"));
+        this.listener.use(express.static(assetsFolder));
 
+        this.listener.set("port", port);
     }
 
     /**
@@ -66,16 +75,32 @@ export class WebServer extends ViewService
         }
     }
 
+    /**
+     * Register a POST callback for a specific endpoint to the listener
+     * @param endpoint absolute path on the server
+     * @param event 
+     */
     public registerPostEndpoint(endpoint: string, event: Function): void 
     {
         this.listener.post(endpoint, event as any);
     }
 
+    /**
+     * Register a GET callback for a specific endpoint to the listener
+     * @param endpoint 
+     * @param event 
+     */
     public registerGetEndpoint(endpoint: string, event: Function): void 
     {
         this.listener.get(endpoint, event as any);
     }
 
+    /**
+     * SetMiddleware always running for all future assigned endpoint callbacks.
+     * 
+     * @param endpoint 
+     * @param event 
+     */
     public setMiddleware(event: Function): void 
     {
         this.listener.use(event as any);
