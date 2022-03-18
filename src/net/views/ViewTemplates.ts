@@ -1,4 +1,3 @@
-import { NextFunction } from 'express';
 import { IViewTemplate } from '../interfaces/IViewTemplate';
 import { IWebResponse } from '../interfaces/IWebResponse';
 import { IWebRequest } from '../interfaces/IWebRequest';
@@ -48,6 +47,7 @@ export namespace ViewTemplates {
 @ViewTemplates.set
 class Index {
   get: IWebRequest = (req, res, next): IWebResponse => {
+    console.log("setting get request");
     return {data:{}}
   }
 
@@ -75,7 +75,7 @@ class GetExample {
 } 
 
 @ViewTemplates.set
-class PostExample
+export class PostExample
 {
   get: IWebRequest = (req, res, next): IWebResponse =>
   {

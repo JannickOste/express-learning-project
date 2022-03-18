@@ -1,4 +1,7 @@
+import { PostExample } from "./net/views/ViewTemplates";
 import { WebServer } from "./net/WebServer";
 
-WebServer.instance.start();
+console.log(PostExample?.prototype.get)
+
+// WebServer.instance.start();
 
