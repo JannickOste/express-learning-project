@@ -7,17 +7,17 @@ import { IWebRequest } from './IWebRequest';
  * @created 2022/03/17
  * @lastUpdate 2022/03/19
  */
- export abstract class IViewTemplate {
+ export interface IViewTemplate {
 
     /**
      * Post method callback
      */
-    public abstract post: IWebRequest | undefined;
+    post: IWebRequest | undefined,
   
     /**
      * Get method callback
      * @param request 
      */
-    public abstract get: Function | undefined;
+    get: Function | undefined
 } 
   

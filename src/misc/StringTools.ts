@@ -7,7 +7,7 @@
  * @lastUpdate 2022/03/19
  */
 
-/* Checks for the characters (&, <, >, ', ") and replaces them by there keycode value : &#CODE; */
+/** Checks for the characters (&, <, >, ', ") and replaces them by there keycode value : &#CODE; */
 export const htmlspecialchars = (str: string): string =>
 {
     return  str.replace(/[&<>'"]/g, i => `&#${i.charCodeAt(0)};`) ;
