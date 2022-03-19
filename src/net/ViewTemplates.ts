@@ -1,12 +1,15 @@
 import { IViewTemplate } from './interfaces/IViewTemplate';
 
 /**
- * Namespace containing IViewTemplate, used for registering views based on generic type attribute (T).
- * models must be made in IViewTemplates.ts otherwise they wont be detected, 
- * todo: look into universal solution..;
+ * psuedocode ViewTemplates
+ * - The code exports a function called getViews() which returns an array of all the registered views.
+ * - The code then exports a function called set() that sets an interface object to the view template stack.
+ * - The code is a wrapper around the IViewTemplate interface.
+ * - It has a readonly prototype property which returns the view implementation object itself.
+ * - The set function takes an instance of the extended type of IViewTemplateModel and pushes it onto the viewImplementations array.
  */
 export namespace ViewTemplates {
-  type Wrapper < T > = {
+  export type Wrapper < T > = {
     new(...args: any[]): T;
 
     readonly prototype: T;

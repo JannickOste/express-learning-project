@@ -6,7 +6,7 @@ import { IWebResponse } from "../interfaces/IWebResponse";
 import { ViewTemplates } from "../ViewTemplates";
 
 /**
- * Implementation of src.net.interfaces.IViewTemplate interface in class style. 
+ * Callback interface based on IWebRequest for endpoint: /.
  */
 @ViewTemplates.set
 export class Index {

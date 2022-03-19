@@ -1,15 +1,14 @@
 import { WebServer } from "./net/WebServer";
+import { Logger } from './misc/Logger';
 const TypeDoc = require("typedoc");
 
 async function generateDocumentation() {
     const app = new TypeDoc.Application();
 
-    // If you want TypeDoc to load tsconfig.json / typedoc.json files
     app.options.addReader(new TypeDoc.TSConfigReader());
     app.options.addReader(new TypeDoc.TypeDocReader());
 
     app.bootstrap({
-        // typedoc options here
         entryPoints: ["src"],
         entryPointStrategy: "expand"
     });
@@ -27,6 +26,13 @@ async function generateDocumentation() {
     }
 }
 
-generateDocumentation().then(r => {
+export function start() 
+{
+    Logger.log("Updating documentation...");
+    generateDocumentation().then(r => console.log("succesfully updated documentation"))
+                            .catch(e => console.log("Failed to update documentation"));
+    
     WebServer.start();
-});
+}
+
+start();

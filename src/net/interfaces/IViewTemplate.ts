@@ -6,21 +6,12 @@ import { IWebRequest } from './IWebRequest';
  * @!TODO: look for universal solution
  */
 
- type Wrapper < T > = {
-    new(...args: any[]): T;
-
-    readonly prototype: T;
-  }
 //#region View interface and namespace.
 /**
  * View data interface
  */
  export abstract class IViewTemplate {
 
-    constructor()
-    {
-        console.log("Hello world");
-    }
     /**
      * Post method callback
      */
