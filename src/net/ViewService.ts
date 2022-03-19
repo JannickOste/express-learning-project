@@ -29,10 +29,10 @@ export abstract class ViewService {
      * - (if interface found): attempt to get post callback and bind to same endpoint.
      * - Set status pages
      */
-    public async setupViews(): Promise<void> 
+    public static async setupViews(): Promise<void> 
     {
         Logger.log("Loading view data...");
-        WebServer.instance.viewEngine = "ejs";
+        WebServer.viewEngine = "ejs";
 
         const viewInterfaces: IViewTemplate[] = await this.getViewInterfaces();
 
@@ -43,7 +43,7 @@ export abstract class ViewService {
                     .filter(i => i.name.toLowerCase() == name.toLowerCase())[0];
 
                     console.log(ViewTemplates.getViews());
-                WebServer.instance.registerGetEndpoint(`/${name}`.replace("index", ""),
+                WebServer.registerGetEndpoint(`/${name}`.replace("index", ""),
                     (req: any, res: any) => {
                         const getCallack: Function | undefined = _interface.prototype.get;
                         res.render(name, _interface && getCallack ? getCallack(req, res) : {});
@@ -54,7 +54,7 @@ export abstract class ViewService {
                         const postCallback = _interface.prototype.post;
                         if(postCallback !== undefined)
                         {
-                            WebServer.instance.registerPostEndpoint(`/${name}`.replace("index", ""),
+                            WebServer.registerPostEndpoint(`/${name}`.replace("index", ""),
                                 (req: any, res: any, next: any) => {
                                     res.render(name, _interface ? postCallback(req, res, next) : {});
                                 }
@@ -67,7 +67,7 @@ export abstract class ViewService {
         this.getViews.filter(n => /^[0-9]+$/.test(n)).forEach(n => {
             const _interface = ViewTemplates.getViews().filter(i => i.name.toLowerCase() == n.toLowerCase())[0];
             
-            WebServer.instance.setMiddleware((req: any, res: any) => {
+            WebServer.setMiddleware((req: any, res: any) => {
                 res.status(n);
 
                 const getCallback: Function | undefined = _interface?.prototype.get; 
@@ -85,7 +85,7 @@ export abstract class ViewService {
      * - if view found, sanitizes to its absolute name and adds the name to return stack.
      * - return found ejs views
      */
-    private get getViews(): string[] {
+    private static get getViews(): string[] {
         let out: string[] = [];
 
         Globals.fileSystem.recurseSync(path.join(Globals.projectRoot, "views"), (filepath: string, relative: string, name: string) => {
@@ -104,7 +104,7 @@ export abstract class ViewService {
      * Load all IViewTemplate extensions from src.net.views
      * @returns 
      */
-         private async getViewInterfaces(): Promise<IViewTemplate[]>
+         private static async getViewInterfaces(): Promise<IViewTemplate[]>
          {
              console.log("Loading interfaces into current namespace...");
              const targetPath: string = path.join(__dirname, "views");
