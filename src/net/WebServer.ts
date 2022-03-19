@@ -1,6 +1,5 @@
-import { ViewService } from './views/ViewService';
+import { ViewService } from './ViewService';
 import express from "express";
-import { postExample } from './views/ViewTemplates';
 import { Logger } from '../misc/Logger';
 /**
  * Webserver object
@@ -69,7 +68,7 @@ export class WebServer extends ViewService
         Logger.log("Starting WebServer...");
         try
         {
-            this.bindViewEngine();
+            this.setupViews();
             this.listener.listen(this.serverPort, 
                 () => console.log(`[${this.constructor.name}]: listening for requests on port ${this.serverPort}`));
         } catch(ex)
@@ -77,6 +76,7 @@ export class WebServer extends ViewService
             if(ex instanceof Error)
                 console.log(ex.message);
         }
+
     }
 
     /**

@@ -2,9 +2,10 @@
   "name": "express-js-server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": ".js",
   "dependencies": {
     "@types/node": "^17.0.21",
+    "beautiful-dom": "^1.0.9",
     "ejs": "^3.1.6",
     "express": "^4.17.3",
     "expressjs": "^1.0.1",
