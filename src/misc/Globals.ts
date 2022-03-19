@@ -6,11 +6,11 @@
  * @lastUpdate 2022/03/19
  */
 
-/** TypeScript "fs" library */
- export const fs = require("fs");
+    /** TypeScript "fs" library */
+    export const fs = require("fs");
 
- /** npm file-system library */
- export const fileSystem = require("file-system");
+    /** npm file-system library */
+    export const fileSystem = require("file-system");
 
- /** Project root */
- export const projectRoot: string = (__dirname.match(/^(.*?)(?=(\/|\\)(src))/) as any)[0];
+    /** Project root */
+    export const projectRoot: string = (__dirname.match(/^(.*?)(?=(\/|\\)(src))/) as any)[0];

@@ -1,14 +1,11 @@
-
-//#region Page objects
-
 import { NextFunction } from "express";
 import { IViewTemplate } from "../interfaces/IViewTemplate";
 import { IWebResponse } from "../interfaces/IWebResponse";
 import { ViewTemplates } from "../ViewTemplates";
-
 /**
  * Callback interface based on IWebRequest for endpoint: /.
  */
+
 @ViewTemplates.set
 export class Index  implements IViewTemplate {
    get(req: Request, res: Response, next: NextFunction): IWebResponse  {
@@ -17,3 +14,4 @@ export class Index  implements IViewTemplate {
  
    post = undefined;
  }
+ 

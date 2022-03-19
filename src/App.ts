@@ -1,5 +1,6 @@
 import { WebServer } from "./net/WebServer";
 import { logMessage } from './misc/Logger';
+
 const TypeDoc = require("typedoc");
 
 async function generateDocumentation() {
