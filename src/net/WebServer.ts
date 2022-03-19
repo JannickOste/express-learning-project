@@ -1,6 +1,6 @@
 import { ViewService } from './ViewService';
 import express from "express";
-import { Logger } from '../misc/Logger';
+import { logMessage } from '../misc/Logger';
 import { IWebRequest } from './interfaces/IWebRequest';
 
 /**
@@ -60,7 +60,7 @@ export class WebServer
      */
     public static start(): void
     {
-        Logger.log("Starting WebServer...");
+        logMessage("Starting WebServer...");
         this.setupListener();
         try
         {
@@ -86,7 +86,7 @@ export class WebServer
      */
     public static registerPostEndpoint(endpoint: string, callback: IWebRequest): void 
     {
-        Logger.log(`Attempting to assign POST callback to: ${endpoint}`);
+        logMessage(`Attempting to assign POST callback to: ${endpoint}`);
 
         this.listener.post(endpoint, callback as any);
     }
@@ -99,7 +99,7 @@ export class WebServer
      */
     public static registerGetEndpoint(endpoint: string, callback: IWebRequest): void 
     {
-        Logger.log(`Attempting to assign GET callback to: ${endpoint}`);
+        logMessage(`Attempting to assign GET callback to: ${endpoint}`);
 
         this.listener.get(endpoint, callback as any);
     }

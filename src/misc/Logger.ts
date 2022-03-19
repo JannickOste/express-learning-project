@@ -1,13 +1,14 @@
-/**
- * Reserved for future logger, currently only prints line to console.
- */
-export class Logger
-{
-    private constructor() { }
-    //todo:  add logging
 
-    public static log(message: string)
-    {
-        console.log(`[LOGGER]: ${message}`);
-    }
+/**
+ * Current session log controller
+ * 
+ * @author Oste Jannick
+ * @created 2022/03/15
+ * @lastUpdate 2022/03/19
+ */
+
+/** Currently not implemented, logs message to console only */
+export const logMessage = (message: string) => 
+{
+    console.log(`[LOGGER]: ${message}`);
 }

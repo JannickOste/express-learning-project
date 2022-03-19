@@ -1,5 +1,5 @@
 import { WebServer } from "./net/WebServer";
-import { Logger } from './misc/Logger';
+import { logMessage } from './misc/Logger';
 const TypeDoc = require("typedoc");
 
 async function generateDocumentation() {
@@ -28,7 +28,7 @@ async function generateDocumentation() {
 
 export function start() 
 {
-    Logger.log("Updating documentation...");
+    logMessage("Updating documentation...");
     generateDocumentation().then(r => console.log("succesfully updated documentation"))
                             .catch(e => console.log("Failed to update documentation"));
     

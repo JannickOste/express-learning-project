@@ -1,10 +1,10 @@
 import path from "path";
 import { ViewTemplates } from "./ViewTemplates";
 
-import { Globals } from '../misc/Globals';
 import { WebServer } from "./WebServer";
-import { Logger } from '../misc/Logger';
+import { logMessage } from '../misc/Logger';
 import { IViewTemplate } from './interfaces/IViewTemplate';
+import { fileSystem, fs, projectRoot } from "../misc/Globals";
 
 /**
  * Service responsible for loading view data and registering endpoints.
@@ -18,13 +18,13 @@ export abstract class ViewService {
     /**
      * Loads all view data and configuration and binds them to required endpoints.
      * 
-     * @psuedocode bindViewEngine
+     * @psuedocode setupViews
      *  -  The code then gets all of the interfaces for views for namespace acces, loads content pages, and load status pages.
      *  -  The code is used to initialize the views for the application.
      */
     public static async setupViews(): Promise<void> 
     {
-        Logger.log("Loading view data...");
+        logMessage("Loading view data...");
         WebServer.viewEngine = "ejs";
 
         await this.getViewInterfaces();
@@ -38,7 +38,7 @@ export abstract class ViewService {
      *
      * psuedocode
      * - The code is loading the status pages.
-     * - The code is iterating through all of the views and then for each view it will check if that view has a name that starts with 0-9, and if so, it will register a middleware function to render the page with an appropriate status code.
+     * - The code is iterating through all of the views and then for each view it will check if that view has a name that starts with 0-9, and if so, it will register a middleware function to render the page with an appropriate status code if required.
      * - The code is a snippet of code that is used to load the status pages.
      * - The code will return an array of ViewTemplates.
     */
@@ -113,7 +113,7 @@ export abstract class ViewService {
     private static get getViews(): string[] {
         let out: string[] = [];
 
-        Globals.fileSystem.recurseSync(path.join(Globals.projectRoot, "views"), (filepath: string, relative: string, name: string) => {
+        fileSystem.recurseSync(path.join(projectRoot, "views"), (filepath: string, relative: string, name: string) => {
             if (name && name.endsWith("ejs")) {
                 const filename = path.basename(filepath);
                 const absName = filename.substring(0, filename.length - 4);
@@ -141,7 +141,7 @@ export abstract class ViewService {
              console.log("Loading interfaces into current namespace...");
              const targetPath: string = path.join(__dirname, "views");
      
-             const viewInterfaces: string[] = Globals.fs.readdirSync(targetPath);
+             const viewInterfaces: string[] = fs.readdirSync(targetPath);
              const views: string[] =  this.getViews.map(i => i.toLowerCase());
              const outputViews: IViewTemplate[] = [];
              for(let interfaceFile of viewInterfaces)
@@ -155,9 +155,8 @@ export abstract class ViewService {
                      }
                      catch(ex)
                      {
-                         // Log exceptie...
                          if(ex instanceof Error)
-                             Logger.log(ex.message);
+                             logMessage(ex.message);
                      }
                  }
              }
