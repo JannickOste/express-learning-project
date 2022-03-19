@@ -16,7 +16,7 @@
   },
   "scripts": {
     "start": "ts-node ./src/App.ts",
-    "install": "tsc --init --experimentalDecorators --rootDir \"./src\" --outDir \"./bin\" && npm install --save @types/node && npm install --save express && npm install --save file-system && npm install --save ejs"
+    "install": "tsc --init --experimentalDecorators --rootDir \"./src\" --outDir \"./bin\" && npm install --save @types/node && npm install --save express && npm install @types/express && npm install --save file-system && npm install --save ejs"
   },
   "repository": {
     "type": "git",
