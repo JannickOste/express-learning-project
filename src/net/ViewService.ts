@@ -15,10 +15,6 @@ import { IViewTemplate } from './interfaces/IViewTemplate';
 export abstract class ViewService {
     protected static readonly ejs: any = require("ejs");
 
-    constructor()
-    {
-    }
-
     /**
      * @description bind all ejs views based on name to listener foreach content and statuscode.
      * @param listener websocket
