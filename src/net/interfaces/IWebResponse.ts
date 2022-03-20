@@ -4,7 +4,9 @@
  * @author Oste Jannick
  * @created 2022/03/17
  */
-export interface IWebResponse
+interface IWebResponse
 {
     data: object;
 }
+
+export = IWebResponse;

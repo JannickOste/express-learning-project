@@ -1,13 +1,11 @@
 import { NextFunction } from "express";
-import { IWebResponse } from '../interfaces/IWebResponse';
-import { ViewTemplates } from "../ViewTemplates";
-import { IViewTemplate } from '../interfaces/IViewTemplate';
+import IWebResponse  from '../interfaces/IWebResponse';
+import { GETRequest} from "./models/GETRequest"
 
 /**
- * Callback interface based on IWebRequest for endpoint: getExample.
+ * Callback interface based on IWebRequest for endpoint: getExample
  */
-@ViewTemplates.set
-export class GetExample implements IViewTemplate
+export class GetExample extends GETRequest
 {
   get(req: Request, res: Response, next: NextFunction): IWebResponse 
   {
@@ -22,6 +20,4 @@ export class GetExample implements IViewTemplate
 
     return response;
   }
-
-  post = undefined
 }

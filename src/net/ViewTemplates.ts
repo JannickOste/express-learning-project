@@ -1,7 +1,7 @@
 import path from 'path';
 import { fs } from '../misc/Globals';
 import { logMessage } from '../misc/Logger';
-import { IViewTemplate } from './interfaces/IViewTemplate';
+import IViewTemplate  from './interfaces/IViewTemplate';
 import { WebServer } from './WebServer';
 
 /**

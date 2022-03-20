@@ -1,6 +1,6 @@
 import { NextFunction } from "express";
-import { IViewTemplate } from "../interfaces/IViewTemplate";
-import { IWebResponse } from "../interfaces/IWebResponse";
+import IViewTemplate from "../interfaces/IViewTemplate";
+import IWebResponse  from "../interfaces/IWebResponse";
 import { ViewTemplates } from "../ViewTemplates";
 
 /**
@@ -21,7 +21,7 @@ export class PostExample implements IViewTemplate
     return response;
   }
 
-  public post(req: any, res: any, next: NextFunction): IWebResponse
+  post(req: any, res: any, next: NextFunction): IWebResponse
   {
     const response: IWebResponse = {
       data:
@@ -32,4 +32,5 @@ export class PostExample implements IViewTemplate
 
     return response;
   }
+  
 }

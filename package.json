@@ -16,8 +16,10 @@
     "typedoc": "^0.22.13"
   },
   "scripts": {
-    "start": "ts-node ./src/App.ts",
-    "install": "tsc --init --experimentalDecorators --rootDir \"./src\" --outDir \"./bin\" && npm install --save @types/node && npm install --save express && npm install @types/express && npm install --save file-system && npm install --save ejs"
+    "dev": "ts-node ./src/App.ts",
+    "install": "tsc --init --experimentalDecorators --rootDir \"./src\" --outDir \"./bin\" && npm install --save-dev @types/node express @types/express file-system ejs",
+    "build": "tsc",
+    "start": "node ./bin/App.js"
   },
   "repository": {
     "type": "git",
