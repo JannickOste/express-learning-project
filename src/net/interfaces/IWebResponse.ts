@@ -1,12 +1,7 @@
-/**
- * Data response interface for server reply
- * 
- * @author Oste Jannick
- * @created 2022/03/17
- */
-interface IWebResponse
+/**  @module net.interfaces  */
+
+/** Data response interface for server reply */
+export interface IWebResponse
 {
     data: object;
 }
-
-export = IWebResponse;

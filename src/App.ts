@@ -1,39 +1,25 @@
-import { WebServer } from "./net/WebServer";
-import { logMessage } from './misc/Logger';
+/**
+ * Automated ExpressJS implementation, using interfaces for Request callbacks and response handeling. 
+ * 
+ * @module App 
+ * @author Oste Jannick
+ * @created 2022/03/15
+ */
 
-const TypeDoc = require("typedoc");
+import { Logger } from "./misc/Logger";
 
-async function generateDocumentation() {
-    const app = new TypeDoc.Application();
 
-    app.options.addReader(new TypeDoc.TSConfigReader());
-    app.options.addReader(new TypeDoc.TypeDocReader());
+/**
+ * Main application entrypoint
+ */
+function main() {
+    Logger.logMessage("Updating documentation...");
+    Logger.dumpDocumentation()
+        .then(r => console.log("succesfully updated documentation"))
+        .catch(e => console.log(`Failed to update documentation\n${e}`));
 
-    app.bootstrap({
-        entryPoints: ["src"],
-        entryPointStrategy: "expand"
-    });
 
-    const project = app.convert();
-
-    if (project) {
-        // Project may not have converted correctly
-        const outputDir = "./public/docs";
-
-        // Rendered docs
-        await app.generateDocs(project, outputDir);
-        // Alternatively generate JSON output
-        await app.generateJson(project, outputDir + "/documentation.json");
-    }
+    //WebServer.start();
 }
 
-export function start() 
-{
-    logMessage("Updating documentation...");
-    generateDocumentation().then(r => console.log("succesfully updated documentation"))
-                            .catch(e => console.log("Failed to update documentation"));
-    
-    WebServer.start();
-}
-
-start();
+main();

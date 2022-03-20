@@ -1,11 +1,13 @@
+/**
+ * @module net.views
+ */
+
 import { NextFunction } from "express";
-import IViewTemplate from "../interfaces/IViewTemplate";
-import IWebResponse  from "../interfaces/IWebResponse";
+import {IViewTemplate} from "../interfaces/IViewTemplate";
+import { IWebResponse } from "../interfaces/IWebResponse";
 import { ViewTemplates } from "../ViewTemplates";
 
-/**
- * Callback interface based on IWebRequest for endpoint: postExample.
- */
+/**  Callback interface based on IWebRequest for endpoint: postExample. */
 @ViewTemplates.set
 export class PostExample implements IViewTemplate
 {

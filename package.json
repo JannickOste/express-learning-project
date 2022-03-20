@@ -13,7 +13,8 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
-    "typedoc": "^0.22.13"
+    "typedoc": "^0.22.13",
+    "typedoc-plugin-merge-modules": "^3.1.0"
   },
   "scripts": {
     "dev": "ts-node ./src/App.ts",

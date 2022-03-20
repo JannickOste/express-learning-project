@@ -1,15 +1,10 @@
+/**  @module net.interfaces  */
 import { Response, Request, NextFunction } from "express"; 
-import IWebResponse from "./IWebResponse";
+import {IWebResponse} from "./IWebResponse";
 
-/**
- * Custom express-js request callback interface
- * 
- * @author Oste Jannick
- * @created 2022/03/17
- */
-interface IWebRequest
+/** Custom express-js request callback interface */
+export interface IWebRequest
 {
     (res: Response, req: Request, next: NextFunction): IWebResponse;
 }
 
-export = IWebRequest;

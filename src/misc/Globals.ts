@@ -1,16 +1,34 @@
 /**
- * Global required module imports.
+ * Miscellaneous utilities.
  * 
- * @author Oste Jannick
- * @created 2022/03/15
- * @lastUpdate 2022/03/19
+ * @module misc
  */
 
-/** TypeScript "fs" library */
-export const fs = require("fs");
-/** npm file-system library */
-export const fileSystem = require("file-system");
-/** Project root */
+import path from "path";
 
-const root = (__dirname.match(/^(.*?)(?=(\/|\\)(src))/) as any);
-export const projectRoot: string = (root !== null ? root[0] : "");
+/** static data and required module imports.*/
+export class Globals
+{
+    /** TypeScript "fs" library */
+    public static readonly  fs = require("fs");
+    /** npm file-system library */
+    public static readonly fileSystem = require("file-system");
+
+    /** Project root */
+    public static get projectRoot(): string {
+        const root = (__dirname.match(/^(.*?)(?=(\/|\\)(src))/) as any);
+        return (root !== null ? root[0] : "");
+    }
+
+    /** Dump location for documentation. */
+    public static get documentationRoot(): string {
+        return path.join(this.projectRoot, this.staticFolder, "docs");
+    }
+
+    /**
+     * public static assets folders. 
+     */
+    public static get staticFolder(): string {
+        return "public static";
+    }
+}

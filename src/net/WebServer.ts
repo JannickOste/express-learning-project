@@ -1,15 +1,19 @@
+/**
+ * Network/Request handeling module 
+ * 
+ * @module net
+ */
+
 import express from "express";
-import { logMessage } from '../misc/Logger';
-import IWebRequest from './interfaces/IWebRequest';
-import IViewTemplate from './interfaces/IViewTemplate';
+import { Logger } from '../misc/Logger';
+import {IViewTemplate} from './interfaces/IViewTemplate';
 import path from 'path';
-import { fileSystem, fs, projectRoot } from '../misc/Globals';
+import { Globals } from '../misc/Globals';
 import { ViewTemplates } from './ViewTemplates';
+import { IWebRequest } from "./interfaces/IWebRequest";
  
 /**
- * @class WebServer
- * @author Oste Jannick.
- * @created 2022/03/15
+ * ExpressJS server module extension class.
  */
 export class WebServer
 {
@@ -21,10 +25,14 @@ export class WebServer
 
     /** Listening port for webrequests. */
     public static get serverPort(): Number  { return this.listener.get("port");}
+
     /** Get the current rendering engine for express-js (default: ejs) */
     public static get viewEngine(): string { return this.listener.get("view engine");}
+
     /**  Set the express-js "Views" engine  */
     public static set viewEngine(value: string) { this.listener.set("view engine", value);};
+
+
 
     /**
      * fetch all ejs templates from views folder under root.
@@ -38,7 +46,7 @@ export class WebServer
      public static get getViewNames(): string[] {
         let out: string[] = [];
 
-        fileSystem.recurseSync(path.join(projectRoot, "views"), (filepath: string, relative: string, name: string) => {
+        Globals.fileSystem.recurseSync(path.join(Globals.projectRoot, "views"), (filepath: string, relative: string, name: string) => {
             if (name && name.endsWith("ejs")) {
                 const filename = path.basename(filepath);
                 const absName = filename.substring(0, filename.length - 4);
@@ -89,7 +97,7 @@ export class WebServer
      */
     public static start(): void
     {
-        logMessage("Starting WebServer...");
+        Logger.logMessage("Starting WebServer...");
         this.setupListener();
 
         ViewTemplates.loadViewInterfaces().then(res => {
@@ -120,7 +128,7 @@ export class WebServer
      */
     public static registerPostEndpoint(endpoint: string, callback: IWebRequest): void 
     {
-        logMessage(`Attempting to assign POST callback to: ${endpoint}`);
+        Logger.logMessage(`Attempting to assign POST callback to: ${endpoint}`);
 
         this.listener.post(endpoint, callback as any);
     }
@@ -133,7 +141,7 @@ export class WebServer
      */
     public static registerGetEndpoint(endpoint: string, callback: IWebRequest): void 
     {
-        logMessage(`Attempting to assign GET callback to: ${endpoint}`);
+        Logger.logMessage(`Attempting to assign GET callback to: ${endpoint}`);
 
         this.listener.get(endpoint, callback as any);
     }

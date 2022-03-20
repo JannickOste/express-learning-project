@@ -1,16 +1,20 @@
+/**  @module net  */
+
 import path from 'path';
-import { fs } from '../misc/Globals';
-import { logMessage } from '../misc/Logger';
-import IViewTemplate  from './interfaces/IViewTemplate';
+import { Globals } from '../misc/Globals';
+import { Logger } from '../misc/Logger';
+import {IViewTemplate}  from './interfaces/IViewTemplate';
 import { WebServer } from './WebServer';
 
 /**
- * psuedocode ViewTemplates
+ * 
+ * psuedocode ViewTemplates namespace
  * - The code exports a function called getViews() which returns an array of all the registered views.
  * - The code then exports a function called set() that sets an interface object to the view template stack.
  * - The code is a wrapper around the IViewTemplate interface.
  * - It has a readonly prototype property which returns the view implementation object itself.
  * - The set function takes an instance of the extended type of IViewTemplateModel and pushes it onto the viewImplementations array.
+ 
  */
 export namespace ViewTemplates {
   export type Wrapper < T > = {
@@ -55,10 +59,10 @@ export namespace ViewTemplates {
    */
    export const loadViewInterfaces = async(): Promise<IViewTemplate[]> =>
    {
-       logMessage("Loading interfaces into current namespace...");
+       Logger.logMessage("Loading interfaces into current namespace...");
        const targetPath: string = path.join(__dirname, "views");
 
-       const viewInterfaces: string[] = fs.readdirSync(targetPath);
+       const viewInterfaces: string[] = Globals.fs.readdirSync(targetPath);
        const views: string[] =  WebServer.getViewNames.map(i => i.toLowerCase());
        const outputViews: IViewTemplate[] = [];
        for(let interfaceFile of viewInterfaces)
@@ -73,7 +77,7 @@ export namespace ViewTemplates {
                catch(ex)
                {
                    if(ex instanceof Error)
-                       logMessage(ex.message);
+                       Logger.logMessage(ex.message);
                }
            }
        }
