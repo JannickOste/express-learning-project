@@ -3,7 +3,7 @@
     <main>
         <p>
             Simple OOP auto loading expressJS server.<br />
-            Registers the views as endpoints and looks for their data interface in the ViewTemplates.ts file 
+            Loads ejs files from {root}/views and sets them as GET endpoints, possible other callbacks can be defined in src.net.views
         </p>
     </main>
 </article>

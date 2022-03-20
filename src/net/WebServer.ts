@@ -6,7 +6,7 @@
 
 import express from "express";
 import { Logger } from '../misc/Logger';
-import {IViewTemplate} from './interfaces/IViewTemplate';
+import { IViewTemplate } from './interfaces/IViewTemplate';
 import path from 'path';
 import { Globals } from '../misc/Globals';
 import { ViewTemplates } from './ViewTemplates';
@@ -25,6 +25,8 @@ export class WebServer
 
     /** Listening port for webrequests. */
     public static get serverPort(): Number  { return this.listener.get("port");}
+    /** Internal setter for listening port. */
+    private static set _serverPort(value: Number) { this.listener.set("port", value);};
 
     /** Get the current rendering engine for express-js (default: ejs) */
     public static get viewEngine(): string { return this.listener.get("view engine");}
@@ -32,57 +34,50 @@ export class WebServer
     /**  Set the express-js "Views" engine  */
     public static set viewEngine(value: string) { this.listener.set("view engine", value);};
 
+    /** Get the rootpath to the ejs views directory. */
+    public static get ejsViewsRoot(): string { return this.listener.settings.views; }
 
+    public static get ejsViewNames(): string[] { return (Globals.fs.readdirSync(this.ejsViewsRoot) as string[])
+                                                                .filter(i => i.endsWith("ejs"))
+                                                                .map(i => i.substring(0, i.length-4));}
 
-    /**
-     * fetch all ejs templates from views folder under root.
-     * 
-     * @psuedocode views
-     * - fetches the projectRoot from the Globals class. 
-     * - Scans recursivly over the views folder for .ejs files (View templates)
-     * - if view found, sanitizes to its absolute name and adds the name to return stack.
-     * - return found ejs views
-     */
-     public static get getViewNames(): string[] {
-        let out: string[] = [];
-
-        Globals.fileSystem.recurseSync(path.join(Globals.projectRoot, "views"), (filepath: string, relative: string, name: string) => {
-            if (name && name.endsWith("ejs")) {
-                const filename = path.basename(filepath);
-                const absName = filename.substring(0, filename.length - 4);
-
-                out.push(absName);
+    public static get viewInterfacesRoot(): string { return path.join(Globals.projectRoot, "src", "net", "views"); }
+    public static get viewInterfaceNames(): string[] { return (Globals.fs.readdirSync(this.viewInterfacesRoot) as string[]).filter(i => i.toLowerCase().endsWith(".ts")).map(i => i.substring(0, i.length-3));}
+    
+    public static async viewInterfaceDict() : Promise<Map<string, IViewTemplate | undefined>> 
+    {
+        let output: Map<string, IViewTemplate | undefined> = new Map<string, IViewTemplate>();
+        for(const ejsN of this.ejsViewNames)
+        {
+            const interfaceName = this.viewInterfaceNames.filter(i => i.toLowerCase()==ejsN.toLowerCase())[0];
+            let _interface: IViewTemplate | undefined = undefined;
+            if(interfaceName)
+            {
+                try
+                {
+                    _interface = await import(path.join(this.viewInterfacesRoot, `${interfaceName}.ts`));
+                } catch(e) {}
             }
-        });
+            output.set(ejsN, _interface);
+        }   
 
-        return out;
+        return output;
     }
-    /**
-     * Get public accessible server data assigned on the listener object
-     * 
-     * @deprecated
-     */
-    public static get serverInfo(): object  { return this.listener.locals.info; }
-
     /**
      * Setup listener configuration
      * 
      * @psuedocode setupListener
-     * - The code starts by setting the serverInfo object
      * - Then it assigns middle ware for incomming json objects, url encoded objects and an accessor for access to the public files directory.
      * - Then it sets the port to the port argument (default:  8080)
      */
     private static setupListener({assetsFolder = "public", port = 8080} = {}): void
     {
-        this.listener.locals.info = {
-            author: "Oste Jannick"
-        } 
 
         this.listener.use(express.json({limit: "1mb"}));
         this.listener.use(express.urlencoded({extended: true}));
         this.listener.use(express.static(assetsFolder));
 
-        this.listener.set("port", port);
+        this._serverPort = port;
     }
 
     /**
@@ -104,6 +99,14 @@ export class WebServer
             this.viewEngine = "ejs";
             this.loadContentPages();
             this.loadStatusPages();
+            
+
+            this.viewInterfaceDict().then(set => {
+                set.forEach((value: IViewTemplate | undefined, key: string) => {
+                    if(value)
+                        console.log(Object.getPrototypeOf(value));
+                })
+            });
 
             try
             {
@@ -168,7 +171,7 @@ export class WebServer
     */
     private static loadStatusPages(): void 
     {
-        const views: string[] = this.getViewNames;
+        const views: string[] = this.ejsViewNames;
         const viewModels: ViewTemplates.Wrapper<IViewTemplate>[] = ViewTemplates.getViewTypes();
 
         views.filter(n => /^[0-9]+$/.test(n)).forEach(n => {
@@ -196,7 +199,7 @@ export class WebServer
      */
     private static loadContentPages(): void 
     {
-        const views = this.getViewNames;
+        const views = this.ejsViewNames;
         const viewModels: ViewTemplates.Wrapper<IViewTemplate>[] = ViewTemplates.getViewTypes();
 
         views.filter((name: string) => !(/^[0-9]+$/.test(name)))

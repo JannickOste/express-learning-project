@@ -1,6 +1,6 @@
 
 /** @module misc */
-/**  Current session log controller */
+/** Current session log controller */
 export class Logger
 {
     private constructor() {}

@@ -1,12 +1,12 @@
 /**
  * Automated ExpressJS implementation, using interfaces for Request callbacks and response handeling. 
  * 
- * @module App 
  * @author Oste Jannick
  * @created 2022/03/15
  */
 
 import { Logger } from "./misc/Logger";
+import { WebServer } from "./net/WebServer";
 
 
 /**
@@ -19,7 +19,7 @@ function main() {
         .catch(e => console.log(`Failed to update documentation\n${e}`));
 
 
-    //WebServer.start();
+    WebServer.start();
 }
 
 main();

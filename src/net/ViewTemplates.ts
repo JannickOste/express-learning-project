@@ -63,7 +63,7 @@ export namespace ViewTemplates {
        const targetPath: string = path.join(__dirname, "views");
 
        const viewInterfaces: string[] = Globals.fs.readdirSync(targetPath);
-       const views: string[] =  WebServer.getViewNames.map(i => i.toLowerCase());
+       const views: string[] =  WebServer.ejsViewNames.map(i => i.toLowerCase());
        const outputViews: IViewTemplate[] = [];
        for(let interfaceFile of viewInterfaces)
        {
