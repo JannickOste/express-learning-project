@@ -6,7 +6,7 @@ import { IWebResponse } from "../interfaces/IWebResponse";
 import { IViewTemplate } from '../interfaces/IViewTemplate';
 
 /**   Callback interface based on IWebRequest for endpoint: /getExample */
-export class GetExample implements IViewTemplate
+export const GetExample: IViewTemplate =
 {
   get(req: Request, res: Response, next: NextFunction): IWebResponse 
   {
@@ -20,7 +20,7 @@ export class GetExample implements IViewTemplate
     }
 
     return response;
-  }
+  },
 
-  post = undefined
+  post: undefined
 }

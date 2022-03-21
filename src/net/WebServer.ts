@@ -7,11 +7,12 @@
 import express from "express";
 import { Logger } from '../misc/Logger';
 import { IViewTemplate } from './interfaces/IViewTemplate';
-import path from 'path';
+import path, { resolve } from 'path';
 import { Globals } from '../misc/Globals';
-import { ViewTemplates } from './ViewTemplates';
 import { IWebRequest } from "./interfaces/IWebRequest";
- 
+import { NextFunction } from 'express';
+import { IWebResponse } from './interfaces/IWebResponse';
+
 /**
  * ExpressJS server module extension class.
  */
@@ -56,6 +57,7 @@ export class WebServer
                 try
                 {
                     _interface = await import(path.join(this.viewInterfacesRoot, `${interfaceName}.ts`));
+                    console.dir(_interface);
                 } catch(e) {}
             }
             output.set(ejsN, _interface);
@@ -95,32 +97,80 @@ export class WebServer
         Logger.logMessage("Starting WebServer...");
         this.setupListener();
 
-        ViewTemplates.loadViewInterfaces().then(res => {
-            this.viewEngine = "ejs";
-            this.loadContentPages();
-            this.loadStatusPages();
-            
+        this.viewEngine = "ejs";
+        this.setViews()
+            .then(v => {
+                try
+                {
+                    this.listener.listen(this.serverPort, 
+                        () => console.log(`[${this.constructor.name}]: listening for requests on port ${this.serverPort}`));
+    
+                } catch(ex)
+                {
+                    if(ex instanceof Error)
+                        console.log(ex.message);
+                }
+            })
+            .catch(e => console.log(`Failed to load endpoints...\n${e}`));
+    }
 
-            this.viewInterfaceDict().then(set => {
-                set.forEach((value: IViewTemplate | undefined, key: string) => {
-                    if(value)
-                        console.log(Object.getPrototypeOf(value));
-                })
+    private static async setViews(): Promise<void> 
+    {
+        return new Promise(async(resolve, reject) => 
+        {
+            const viewDict: Map<string, IViewTemplate | undefined> = await this.viewInterfaceDict();
+            const setKeys: string[] = [];
+            const defaultResponse: IWebResponse = { data:{} }
+
+            const statusCodeCallbacks: Function[] = [];
+            viewDict.forEach((value: IViewTemplate | undefined, key: string) => {
+                const modulePrototype = Object.assign({}, value);
+                const interfaceName: string = Object.getOwnPropertyNames(modulePrototype)[0];
+                const interfacePrototype: IViewTemplate = Object.assign({}, (modulePrototype as {[key: string]: any})[interfaceName])
+
+                if(/^[a-zA-Z]+$/.test(key))
+                {
+                    WebServer.registerGetEndpoint(`/${key}`.replace("index", ""),
+                        (req, res, next) => {
+                            return (res as any).render(key, interfacePrototype.get ? interfacePrototype.get(req, res) : defaultResponse);
+                    });
+                    
+                    if (interfacePrototype.post) 
+                    {
+                        WebServer.registerPostEndpoint(`/${key}`.replace("index", ""),
+                            (req, res, next) => {
+                                return (res as any).render(key, interfacePrototype.post ? interfacePrototype.post(req, res, next) : defaultResponse);
+                            }
+                        );
+                    }
+                    setKeys.push(key);
+                }
+                else if(/^[0-9]{3}$/.test(key))
+                {
+                    statusCodeCallbacks.push(
+                        () =>
+                        {
+
+                            WebServer.registerMiddleware((req: Request, res: Response, next: NextFunction) =>
+                            {
+                                (res as any).status(Number.parseInt(key));
+                                (res as any).render(key, interfacePrototype.get ? interfacePrototype.get(req, res) : defaultResponse);
+                            });
+        
+                            setKeys.push(key);
+                        }
+                    );
+                }
             });
 
-            try
-            {
-                        this.listener.listen(this.serverPort, 
-                            () => console.log(`[${this.constructor.name}]: listening for requests on port ${this.serverPort}`));
+            statusCodeCallbacks.forEach(clbk => clbk());
 
-            } catch(ex)
-            {
-                if(ex instanceof Error)
-                    console.log(ex.message);
-            }
+
+            const unsetkeys = Array.from(viewDict.keys()).filter(k => !setKeys.includes(k));
+            if(unsetkeys.length)
+                reject(new Error(`Failed to set the following views: ${unsetkeys.join(", ")}`));
+            else resolve();
         })
-
-
     }
 
     /**
@@ -157,74 +207,5 @@ export class WebServer
     public static registerMiddleware(callback: Function): void 
     {
         this.listener.use(callback as any);
-    }
-
-    /**
-     * Load all status pages for non valid webresponse (ex: 401 access, 404 non existent, ...)
-     * 
-     *
-     * psuedocode
-     * - The code is loading the status pages.
-     * - The code is iterating through all of the views and then for each view it will check if that view has a name that starts with 0-9, and if so, it will register a middleware function to render the page with an appropriate status code if required.
-     * - The code is a snippet of code that is used to load the status pages.
-     * - The code will return an array of ViewTemplates.
-    */
-    private static loadStatusPages(): void 
-    {
-        const views: string[] = this.ejsViewNames;
-        const viewModels: ViewTemplates.Wrapper<IViewTemplate>[] = ViewTemplates.getViewTypes();
-
-        views.filter(n => /^[0-9]+$/.test(n)).forEach(n => {
-            const _interface = viewModels.filter(i => i.name.toLowerCase() == n.toLowerCase())[0];
-            
-            WebServer.registerMiddleware((req: any, res: any, next: any) => {
-                res.status(n);
-
-                const getCallback: Function | undefined = _interface?.prototype.get; 
-                res.render(n, _interface && getCallback ? getCallback(req, res) : {})
-            });
-        })
-    }
-
-    /**
-     * Loads all non numerical pages and assigns required requests to endpoint matching the filename.
-     * 
-     * psuedocode
-     * - The code is trying to load all the content pages.
-     * - It does this by filtering out any views that do not have a name starting with an alphabetical character and then iterating over each view model.
-     * - For each view model, it registers a get endpoint for the view's name and posts a render function which will call back into the registered post endpoint if one exists.
-     * - If there is no post callback, it will just return what was rendered from the get endpoint.
-     * - The code first checks if there is an interface for that particular view model before registering both endpoints in order to make sure they are available when needed.
-     * - The code is used to load content pages.
-     */
-    private static loadContentPages(): void 
-    {
-        const views = this.ejsViewNames;
-        const viewModels: ViewTemplates.Wrapper<IViewTemplate>[] = ViewTemplates.getViewTypes();
-
-        views.filter((name: string) => !(/^[0-9]+$/.test(name)))
-            .forEach((name: string) => {
-                const _interface = viewModels.filter(i => i.name.toLowerCase() == name.toLowerCase())[0];
-                WebServer.registerGetEndpoint(`/${name}`.replace("index", ""),
-                    (req, res, next) => {
-                        const getCallack: Function | undefined = _interface.prototype.get;
-                        return (res as any).render(name, _interface && getCallack ? getCallack(req, res) : {});
-                });
-                
-                if (_interface) {
-
-                    {
-                        const postCallback = _interface.prototype.post;
-                        if(postCallback !== undefined)
-                        {
-                            WebServer.registerPostEndpoint(`/${name}`.replace("index", ""),
-                                (req, res, next) => {
-                                    return (res as any).render(name, _interface ? postCallback(req, res, next) : {});
-                                }
-                            );
-                        }
-                    }
-                }
-            });
     }
 }
