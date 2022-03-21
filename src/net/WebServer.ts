@@ -71,6 +71,7 @@ export class WebServer
 
         return output;
     }
+
     /**
      * Setup listener configuration
      * 
@@ -89,6 +90,85 @@ export class WebServer
     }
 
     /**
+     * Attempts to load all EJS views and there interface if required.
+     * - Handles numerical names as response code pages.
+     * - Handles alphabetical names as content pages and attempts to load an interface matching the name of the ejs file, non case sensitive.
+     * - Uses a stack based implementation to process endpoints as status codes are required to be loaded last. 
+     */    
+     private static setEndpoints(): Promise<void> 
+     {
+         return new Promise(async(resolve, reject) => 
+         {
+             const endpointSetters: Function[] = [];
+             for(const pair of await this.getViewPrototypes()) 
+             {
+                 const ejsName: string = pair[0];
+                 const callbackInterface:{[key:string]:IWebRequest} | undefined = pair[1]
+ 
+                 const endpoint: string = `/${ejsName}`.replace("index", "");
+                 
+                 if(/^[0-9]{3}$/.test(ejsName))
+                 {
+                     endpointSetters.push(() => this.listener.use((req, res, next) => {
+                         res.status(Number.parseInt(ejsName));
+                         return res.render(ejsName, {});
+                     }));
+                 }
+                 else if (/^[a-zA-Z]+$/.test(ejsName)) {
+                     if(callbackInterface) 
+                     {
+                         for(const requestType in callbackInterface)
+                         {
+                             if(callbackInterface[requestType] === undefined ) continue;
+                             const renderViewCallback = (req: any, res: any, next : any) => (res as any).render(ejsName, callbackInterface[requestType](req, res, next));
+     
+                             let setter: Function | undefined;  
+                             if(/^[a-zA-Z]+$/.test(ejsName))
+                             {  
+                                 switch(requestType)
+                                 {
+                                     case "get":      setter = () => this.listener.get(endpoint, renderViewCallback); break;
+                                     case "post":     setter = () => this.listener.post(endpoint, renderViewCallback); break;
+                                     case "put":      setter = () => this.listener.put(endpoint, renderViewCallback); break;
+                                     case "patch":    setter = () => this.listener.patch(endpoint,renderViewCallback); break;
+                                     case "delete":   setter = () => this.listener.delete(endpoint, renderViewCallback); break;
+                                     case "copy":     setter = () => this.listener.copy(endpoint, renderViewCallback); break;
+                                     case "head":     setter = () => this.listener.head(endpoint, renderViewCallback); break;
+                                     case "options":  setter = () => this.listener.options(endpoint, renderViewCallback); break;
+                                     case "purge":    setter = () => this.listener.purge(endpoint, renderViewCallback); break;
+                                     case "lock":     setter = () => this.listener.lock(endpoint, renderViewCallback); break;
+                                     case "unlock":   setter = () => this.listener.unlock(endpoint, renderViewCallback); break;
+                                     case "propfind": setter = () => this.listener.propfind(endpoint, renderViewCallback); break;
+                                 }
+                             } 
+                             
+                             if(setter)
+                                 endpointSetters.unshift(setter);
+                         }
+                     } 
+                     else 
+                     {
+                         endpointSetters.unshift(() => this.listener.get(endpoint, (req: any, res: any, next: any) => {
+                             return res.render(ejsName,  {});
+                         }));
+                     }
+                 }
+             }
+ 
+             try
+             {
+                 Logger.logMessage(`Found ${endpointSetters.length} request setters, attempting to assign requests to endpoints...`);
+                 endpointSetters.filter(i => i !== undefined).forEach(callback => callback());
+                 resolve();
+             }
+             catch(ex)
+             {
+                 reject(ex);
+             }
+         });
+     }
+
+    /**
      * Setup listener and start listening for requests.
      * 
      * psuedocode
@@ -104,7 +184,7 @@ export class WebServer
         this.setupListener();
 
         this.viewEngine = "ejs";
-        this.setViews()
+        this.setEndpoints()
             .then(v => {
                 try
                 {
@@ -120,88 +200,4 @@ export class WebServer
             .catch(e => console.log(`Failed to load endpoints...\n${e}`));
     }
 
-    /**
-     * 
-      * - The code starts by creating an object called viewDict from the viewPrototypes output.
-      * - This is a map of key-value pairs where the keys are strings and the values are IWebRequest objects.
-      * - The code then iterates over all of the views in this map, sorting them by their names value (the numeric values last).
-      * - The code then gets the key and the value from the current iteration pair.
-      * - The code then parses the endpoint based on the name 
-      * - The code then starts iterating over all the IWebRequest interface properties
-      * - it checks foreach property or it has been defined 
-      * - if not, it continues to the next value in the iteration
-      * - if defined, it checks
-     */    
-    private static setViews(): Promise<void> 
-    {
-        return new Promise(async(resolve, reject) => 
-        {
-            const endpointSetters: Function[] = [];
-            for(const pair of await this.getViewPrototypes()) 
-            {
-                const ejsName: string = pair[0];
-                const callbackInterface:{[key:string]:IWebRequest} | undefined = pair[1]
-
-                const endpoint: string = `/${ejsName}`.replace("index", "");
-                
-                if(/^[0-9]{3}$/.test(ejsName))
-                {
-                    endpointSetters.push(() => this.listener.use((req, res, next) => {
-                        res.status(Number.parseInt(ejsName));
-                        return res.render(ejsName, {});
-                    }));
-                }
-                else if (/^[a-zA-Z]+$/.test(ejsName)) {
-                    if(callbackInterface) 
-                    {
-                        for(const requestType in callbackInterface)
-                        {
-                            if(callbackInterface[requestType] === undefined ) continue;
-                            const renderViewCallback = (req: any, res: any, next : any) => (res as any).render(ejsName, callbackInterface[requestType](req, res, next));
-    
-                            let setter: Function | undefined;  
-                            if(/^[a-zA-Z]+$/.test(ejsName))
-                            {  
-                                switch(requestType)
-                                {
-                                    case "get":      setter = () => this.listener.get(endpoint, renderViewCallback); break;
-                                    case "post":     setter = () => this.listener.post(endpoint, renderViewCallback); break;
-                                    case "put":      setter = () => this.listener.put(endpoint, renderViewCallback); break;
-                                    case "patch":    setter = () => this.listener.patch(endpoint,renderViewCallback); break;
-                                    case "delete":   setter = () => this.listener.delete(endpoint, renderViewCallback); break;
-                                    case "copy":     setter = () => this.listener.copy(endpoint, renderViewCallback); break;
-                                    case "head":     setter = () => this.listener.head(endpoint, renderViewCallback); break;
-                                    case "options":  setter = () => this.listener.options(endpoint, renderViewCallback); break;
-                                    case "purge":    setter = () => this.listener.purge(endpoint, renderViewCallback); break;
-                                    case "lock":     setter = () => this.listener.lock(endpoint, renderViewCallback); break;
-                                    case "unlock":   setter = () => this.listener.unlock(endpoint, renderViewCallback); break;
-                                    case "propfind": setter = () => this.listener.propfind(endpoint, renderViewCallback); break;
-                                }
-                            } 
-                            
-                            if(setter)
-                                endpointSetters.unshift(setter);
-                        }
-                    } 
-                    else 
-                    {
-                        endpointSetters.unshift(() => this.listener.get(endpoint, (req: any, res: any, next: any) => {
-                            return res.render(ejsName,  {});
-                        }));
-                    }
-                }
-            }
-
-            try
-            {
-                Logger.logMessage(`Found ${endpointSetters.length} request setters, attempting to assign requests to endpoints...`);
-                endpointSetters.filter(i => i !== undefined).forEach(callback => callback());
-                resolve();
-            }
-            catch(ex)
-            {
-                reject(ex);
-            }
-        });
-    }
 }
