@@ -9,6 +9,7 @@ import { Logger } from '../misc/Logger';
 import { Globals } from '../misc/Globals';
 import path from 'path';
 import { IWebRequest } from './interfaces/IWebRequest';
+import { IWebResponse } from './interfaces/IWebResponse';
 
 /**
  * ExpressJS server module extension class.
@@ -137,28 +138,36 @@ export class WebServer
         return new Promise(async(resolve, reject) => 
         {
             const viewDict: Map<string, {[key: string]: IWebRequest} | undefined> = await this.viewPrototypes();
-            Array.from(viewDict).sort(i => /^[0-9]+$/.test(i[0]) ? 1 : -1).forEach(
-                (pair) => 
-                {
-                    const key: string = pair[0];
-                    const value: any = pair[1];
-                    const setterCallbacks: Function[] = [];
-                    const endpoint: string = `/${key}`.replace("index", "");
+            const sortedDict: any =  Array.from(viewDict).sort(i => /^[0-9]+$/.test(i[0]) ? 1 : -1);
+
+            const endpointSetters: Function[] = [];
+            for(const index in sortedDict)
+            {
+                const ejsName: string = sortedDict[index][0];
+                const callbackInterface: {[key:string]:IWebRequest} = sortedDict[index][1]
+
+                const endpoint: string = `/${ejsName}`.replace("index", "");
                     
-                    if(/^[0-9]{3}$/.test(key))
-                        setterCallbacks.push(() =>this.listener.use((req, res, next) => {
-                            res.status(Number.parseInt(key));
-                            return res.render(key, {});
-                        }));
-                    else if (value) {
-                        for(const requestType in value)
+                if(/^[0-9]{3}$/.test(ejsName))
+                {
+                    endpointSetters.push(() => this.listener.use((req, res, next) => {
+                        res.status(Number.parseInt(ejsName));
+                        return res.render(ejsName, {});
+                    }));
+                }
+                else if (/^[a-zA-Z]+$/.test(ejsName)) {
+                    if(callbackInterface)
+                    {
+                        for(const requestType in callbackInterface)
                         {
-                            if(value[requestType] === undefined ) continue;
-                            const renderViewCallback = (req: any, res: any, next : any) => (res as any).render(key, value[requestType](req, res));
+                            if(callbackInterface[requestType] === undefined ) continue;
+                            const renderViewCallback = (req: any, res: any, next : any) => (res as any).render(ejsName, callbackInterface[requestType](req, res, next));
     
                             let setter: Function | undefined;  
-                            if(/^[a-zA-Z]+$/.test(key))
+                            if(/^[a-zA-Z]+$/.test(ejsName))
                             {  
+                                
+                                console.log("Creating response setter for "+requestType.toUpperCase()+" at endpoint "+endpoint);
                                 switch(requestType)
                                 {
                                     case "get":      setter = () => this.listener.get(endpoint, renderViewCallback); break;
@@ -175,20 +184,23 @@ export class WebServer
                                     case "propfind": setter = () => this.listener.propfind(endpoint, renderViewCallback); break;
                                 }
                             } 
-
+                            
                             if(setter)
-                                setterCallbacks.push(() =>setter);
+                                endpointSetters.unshift(setter);
                         }
                     }
+                }
+            }
 
-                    try
-                    {
-
-                        setterCallbacks.forEach(clbk => clbk());
-                    } catch(ex){reject(ex)}
-                });
-
-            resolve();
+            try
+            {
+                endpointSetters.filter(i => i !== undefined).forEach(callback => callback());
+                resolve();
+            }
+            catch(ex)
+            {
+                reject(ex);
+            }
         });
     }
 }
