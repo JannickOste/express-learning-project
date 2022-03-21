@@ -20,12 +20,16 @@
 </article>
 
 <article>
-    <header><h2>Current functionality:</h2></header>
+    <header><h2>Currently supports:</h2></header>
     <main>
         <ul>
-            <li>HTTPServer singleton pattern</li>
-            <li>Automated ExpressJS view loading</li>
-            <li>POST/GET callback interface implementation</li>
+            <li>HTTP</li>
+            <li>EJS views as templates</li>
+            <li>Callback interfaces for responses</li>
+            <li>Automated loading for EJS views</li>
+            <li>Automated response assignment for EJS views</li>
+            <li>Documentation generation</li>
+            <li>Stack based endpoint loading</li>
         </ul>
     </main>
 </article>
