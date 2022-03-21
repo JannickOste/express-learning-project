@@ -6,12 +6,9 @@
 
 import express from "express";
 import { Logger } from '../misc/Logger';
-import { IViewTemplate } from './interfaces/IViewTemplate';
-import path, { resolve } from 'path';
 import { Globals } from '../misc/Globals';
-import { IWebRequest } from "./interfaces/IWebRequest";
-import { NextFunction } from 'express';
-import { IWebResponse } from './interfaces/IWebResponse';
+import path from 'path';
+import { IWebRequest } from './interfaces/IWebRequest';
 
 /**
  * ExpressJS server module extension class.
@@ -38,27 +35,37 @@ export class WebServer
     /** Get the rootpath to the ejs views directory. */
     public static get ejsViewsRoot(): string { return this.listener.settings.views; }
 
+    /** Get all absolute names of ejs files in ejs views directory. */
     public static get ejsViewNames(): string[] { return (Globals.fs.readdirSync(this.ejsViewsRoot) as string[])
                                                                 .filter(i => i.endsWith("ejs"))
                                                                 .map(i => i.substring(0, i.length-4));}
 
+    /** Get ejs view interfaces root */
     public static get viewInterfacesRoot(): string { return path.join(Globals.projectRoot, "src", "net", "views"); }
+    
+    /** Get names of all ejs view interfaces */
     public static get viewInterfaceNames(): string[] { return (Globals.fs.readdirSync(this.viewInterfacesRoot) as string[]).filter(i => i.toLowerCase().endsWith(".ts")).map(i => i.substring(0, i.length-3));}
     
-    public static async viewInterfaceDict() : Promise<Map<string, IViewTemplate | undefined>> 
+    /** Get all viewnames and there prototype if available  */
+    public static async viewPrototypes() : Promise<Map<string, {[key: string]: IWebRequest} | undefined>> 
     {
-        let output: Map<string, IViewTemplate | undefined> = new Map<string, IViewTemplate>();
+        let output: Map<string, {[key: string]: IWebRequest} | undefined> = new Map<string, {[key: string]: IWebRequest} | undefined>();
         for(const ejsN of this.ejsViewNames)
         {
             const interfaceName = this.viewInterfaceNames.filter(i => i.toLowerCase()==ejsN.toLowerCase())[0];
-            let _interface: IViewTemplate | undefined = undefined;
+            let _interface: {[key: string]: any} | undefined = undefined;
             if(interfaceName)
             {
                 try
                 {
-                    _interface = await import(path.join(this.viewInterfacesRoot, `${interfaceName}.ts`));
+                    const modulePrototype = Object.assign({}, await import(path.join(this.viewInterfacesRoot, `${interfaceName}.ts`)));
+                    const objectName: string = Object.getOwnPropertyNames(modulePrototype)[0];
+
+                    _interface = Object.assign({}, (modulePrototype as {[key: string]: any})[objectName]);
+
                 } catch(e) {}
             }
+
             output.set(ejsN, _interface);
         }   
 
@@ -113,68 +120,68 @@ export class WebServer
             .catch(e => console.log(`Failed to load endpoints...\n${e}`));
     }
 
-    private static async setViews(): Promise<void> 
+    /**
+     * 
+      * - The code starts by creating an object called viewDict from the viewPrototypes output.
+      * - This is a map of key-value pairs where the keys are strings and the values are IWebRequest objects.
+      * - The code then iterates over all of the views in this map, sorting them by their names value (the numeric values last).
+      * - The code then gets the key and the value from the current iteration pair.
+      * - The code then parses the endpoint based on the name 
+      * - The code then starts iterating over all the IWebRequest interface properties
+      * - it checks foreach property or it has been defined 
+      * - if not, it continues to the next value in the iteration
+      * - if defined, it checks
+     */    
+    private static setViews(): Promise<void> 
     {
         return new Promise(async(resolve, reject) => 
         {
-            const viewDict: Map<string, IViewTemplate | undefined> = await this.viewInterfaceDict();
-            const finalizingCallbacks: Function[] = [];
-            viewDict.forEach((value: IViewTemplate | undefined, key: string) => {
-                const modulePrototype = Object.assign({}, value);
-                const interfaceName: string = Object.getOwnPropertyNames(modulePrototype)[0];
-                
-                const interfacePrototype: {[key: string]: any} = Object.assign({}, (modulePrototype as {[key: string]: any})[interfaceName])
-                const endpoint: string = `/${key}`.replace("index", "");
-                for(const requestType in interfacePrototype)
+            const viewDict: Map<string, {[key: string]: IWebRequest} | undefined> = await this.viewPrototypes();
+            Array.from(viewDict).sort(i => /^[0-9]+$/.test(i[0]) ? 1 : -1).forEach(
+                (pair) => 
                 {
-                    const requestCallback = interfacePrototype[requestType];
-                    if(requestCallback === undefined) continue;
-
-                    const renderViewCallback = (req: any, res: any, next : any) => {
-                        return (res as any).render(key, requestCallback(req, res));
-                    }
-                    let setter: Function | undefined;
-
-                    switch(requestType)
-                    {
-                        case "get":      setter = () => this.listener.get(endpoint, renderViewCallback); break;
-                        case "post":     setter = () => this.listener.post(endpoint, renderViewCallback); break;
-                        case "put":      setter = () => this.listener.put(endpoint, renderViewCallback); break;
-                        case "patch":    setter = () => this.listener.patch(endpoint,renderViewCallback); break;
-                        case "delete":   setter = () => this.listener.delete(endpoint, renderViewCallback); break;
-                        case "copy":     setter = () => this.listener.copy(endpoint, renderViewCallback); break;
-                        case "head":     setter = () => this.listener.head(endpoint, renderViewCallback); break;
-                        case "options":  setter = () => this.listener.options(endpoint, renderViewCallback); break;
-                        case "purge":    setter = () => this.listener.purge(endpoint, renderViewCallback); break;
-                        case "lock":     setter = () => this.listener.lock(endpoint, renderViewCallback); break;
-                        case "unlock":   setter = () => this.listener.unlock(endpoint, renderViewCallback); break;
-                        case "propfind": setter = () => this.listener.propfind(endpoint, renderViewCallback); break;
-                    }
+                    const key: string = pair[0];
+                    const value: any = pair[1];
                     
-                    if(setter)
-                    {
-                        if(/^[a-zA-Z]+$/.test(key))
+                    const endpoint: string = `/${key}`.replace("index", "");
+                    if(/^[0-9]{3}$/.test(key))
+                        this.listener.use((req, res, next) => {
+                            res.status(Number.parseInt(key));
+                            return res.render(key, {});
+                        });
+                    else if (value) {
+                        for(const requestType in value)
                         {
-                            setter();
-                        } else finalizingCallbacks.push(setter);
-                    } 
-                }
-            });
+                            if(value[requestType] === undefined ) continue;
+                            const renderViewCallback = (req: any, res: any, next : any) => (res as any).render(key, value[requestType](req, res));
+    
+                            let setter: Function | undefined;  
+                            if(/^[a-zA-Z]+$/.test(key))
+                            {  
+                                switch(requestType)
+                                {
+                                    case "get":      setter = () => this.listener.get(endpoint, renderViewCallback); break;
+                                    case "post":     setter = () => this.listener.post(endpoint, renderViewCallback); break;
+                                    case "put":      setter = () => this.listener.put(endpoint, renderViewCallback); break;
+                                    case "patch":    setter = () => this.listener.patch(endpoint,renderViewCallback); break;
+                                    case "delete":   setter = () => this.listener.delete(endpoint, renderViewCallback); break;
+                                    case "copy":     setter = () => this.listener.copy(endpoint, renderViewCallback); break;
+                                    case "head":     setter = () => this.listener.head(endpoint, renderViewCallback); break;
+                                    case "options":  setter = () => this.listener.options(endpoint, renderViewCallback); break;
+                                    case "purge":    setter = () => this.listener.purge(endpoint, renderViewCallback); break;
+                                    case "lock":     setter = () => this.listener.lock(endpoint, renderViewCallback); break;
+                                    case "unlock":   setter = () => this.listener.unlock(endpoint, renderViewCallback); break;
+                                    case "propfind": setter = () => this.listener.propfind(endpoint, renderViewCallback); break;
+                                }
+                            } 
 
+                            if(setter)
+                                setter();
+                        }
+                    }
+                });
 
-            finalizingCallbacks.forEach(clbk => clbk());
             resolve();
-        })
-    }
-
-
-    /**
-     * SetMiddleware always running for all future assigned endpoint callbacks.
-     * 
-     * @param callback middleware callback
-     */
-    public static registerMiddleware(callback: Function): void 
-    {
-        this.listener.use(callback as any);
+        });
     }
 }

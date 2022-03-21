@@ -6,7 +6,7 @@ import {IViewTemplate} from "../interfaces/IViewTemplate";
 import { IWebResponse } from "../interfaces/IWebResponse";
 
 export const Index: IViewTemplate = {
-  get(req: Request, res: Response, next: NextFunction): IWebResponse  {
+  get(req, res, next): IWebResponse  {
     return {data:{}}
   },
 

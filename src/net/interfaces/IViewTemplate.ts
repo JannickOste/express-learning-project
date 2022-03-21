@@ -14,5 +14,5 @@ export interface IViewTemplate {
      * Get method callback
      * @param request 
      */
-    get: Function | undefined
+    get: IWebRequest | undefined
 } 

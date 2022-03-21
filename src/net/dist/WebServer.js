@@ -44,8 +44,8 @@ exports.__esModule = true;
 exports.WebServer = void 0;
 var express_1 = require("express");
 var Logger_1 = require("../misc/Logger");
-var path_1 = require("path");
 var Globals_1 = require("../misc/Globals");
+var path_1 = require("path");
 /**
  * ExpressJS server module extension class.
  */
@@ -82,6 +82,7 @@ var WebServer = /** @class */ (function () {
         configurable: true
     });
     Object.defineProperty(WebServer, "ejsViewNames", {
+        /** Get all absolute names of ejs files in ejs views directory. */
         get: function () {
             return Globals_1.Globals.fs.readdirSync(this.ejsViewsRoot)
                 .filter(function (i) { return i.endsWith("ejs"); })
@@ -91,16 +92,19 @@ var WebServer = /** @class */ (function () {
         configurable: true
     });
     Object.defineProperty(WebServer, "viewInterfacesRoot", {
+        /** Get ejs view interfaces root */
         get: function () { return path_1["default"].join(Globals_1.Globals.projectRoot, "src", "net", "views"); },
         enumerable: false,
         configurable: true
     });
     Object.defineProperty(WebServer, "viewInterfaceNames", {
+        /** Get names of all ejs view interfaces */
         get: function () { return Globals_1.Globals.fs.readdirSync(this.viewInterfacesRoot).filter(function (i) { return i.toLowerCase().endsWith(".ts"); }).map(function (i) { return i.substring(0, i.length - 3); }); },
         enumerable: false,
         configurable: true
     });
-    WebServer.viewInterfaceDict = function () {
+    /** Get all viewnames and there prototype if available  */
+    WebServer.viewPrototypes = function () {
         return __awaiter(this, void 0, Promise, function () {
             var output, _loop_1, this_1, _i, _a, ejsN;
             return __generator(this, function (_b) {
@@ -108,22 +112,26 @@ var WebServer = /** @class */ (function () {
                     case 0:
                         output = new Map();
                         _loop_1 = function (ejsN) {
-                            var interfaceName, _interface, e_1;
-                            return __generator(this, function (_a) {
-                                switch (_a.label) {
+                            var interfaceName, _interface, modulePrototype, _a, _b, _c, objectName, e_1;
+                            return __generator(this, function (_d) {
+                                switch (_d.label) {
                                     case 0:
                                         interfaceName = this_1.viewInterfaceNames.filter(function (i) { return i.toLowerCase() == ejsN.toLowerCase(); })[0];
                                         _interface = undefined;
                                         if (!interfaceName) return [3 /*break*/, 4];
-                                        _a.label = 1;
+                                        _d.label = 1;
                                     case 1:
-                                        _a.trys.push([1, 3, , 4]);
+                                        _d.trys.push([1, 3, , 4]);
+                                        _b = (_a = Object).assign;
+                                        _c = [{}];
                                         return [4 /*yield*/, Promise.resolve().then(function () { return require(path_1["default"].join(this_1.viewInterfacesRoot, interfaceName + ".ts")); })];
                                     case 2:
-                                        _interface = _a.sent();
+                                        modulePrototype = _b.apply(_a, _c.concat([_d.sent()]));
+                                        objectName = Object.getOwnPropertyNames(modulePrototype)[0];
+                                        _interface = Object.assign({}, modulePrototype[objectName]);
                                         return [3 /*break*/, 4];
                                     case 3:
-                                        e_1 = _a.sent();
+                                        e_1 = _d.sent();
                                         return [3 /*break*/, 4];
                                     case 4:
                                         output.set(ejsN, _interface);
@@ -189,98 +197,96 @@ var WebServer = /** @class */ (function () {
             }
         })["catch"](function (e) { return console.log("Failed to load endpoints...\n" + e); });
     };
+    /**
+     *
+      * - The code starts by creating an object called viewDict from the viewPrototypes output.
+      * - This is a map of key-value pairs where the keys are strings and the values are IWebRequest objects.
+      * - The code then iterates over all of the views in this map, sorting them by their names value (the numeric values last).
+      * - The code then gets the key and the value from the current iteration pair.
+      * - The code then parses the endpoint based on the name
+      * - The code then starts iterating over all the IWebRequest interface properties
+      * - it checks foreach property or it has been defined
+      * - if not, it continues to the next value in the iteration
+      * - if defined, it checks
+     */
     WebServer.setViews = function () {
-        return __awaiter(this, void 0, Promise, function () {
+        var _this = this;
+        return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+            var viewDict;
             var _this = this;
             return __generator(this, function (_a) {
-                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-                        var viewDict, finalizingCallbacks;
-                        var _this = this;
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0: return [4 /*yield*/, this.viewInterfaceDict()];
-                                case 1:
-                                    viewDict = _a.sent();
-                                    finalizingCallbacks = [];
-                                    viewDict.forEach(function (value, key) {
-                                        var modulePrototype = Object.assign({}, value);
-                                        var interfaceName = Object.getOwnPropertyNames(modulePrototype)[0];
-                                        var interfacePrototype = Object.assign({}, modulePrototype[interfaceName]);
-                                        var endpoint = ("/" + key).replace("index", "");
-                                        var _loop_2 = function (requestType) {
-                                            var requestCallback = interfacePrototype[requestType];
-                                            if (requestCallback === undefined)
-                                                return "continue";
-                                            var renderViewCallback = function (req, res, next) {
-                                                return res.render(key, requestCallback(req, res));
-                                            };
-                                            var setter = void 0;
-                                            switch (requestType) {
-                                                case "get":
-                                                    setter = function () { return _this.listener.get(endpoint, renderViewCallback); };
-                                                    break;
-                                                case "post":
-                                                    setter = function () { return _this.listener.post(endpoint, renderViewCallback); };
-                                                    break;
-                                                case "put":
-                                                    setter = function () { return _this.listener.put(endpoint, renderViewCallback); };
-                                                    break;
-                                                case "patch":
-                                                    setter = function () { return _this.listener.patch(endpoint, renderViewCallback); };
-                                                    break;
-                                                case "delete":
-                                                    setter = function () { return _this.listener["delete"](endpoint, renderViewCallback); };
-                                                    break;
-                                                case "copy":
-                                                    setter = function () { return _this.listener.copy(endpoint, renderViewCallback); };
-                                                    break;
-                                                case "head":
-                                                    setter = function () { return _this.listener.head(endpoint, renderViewCallback); };
-                                                    break;
-                                                case "options":
-                                                    setter = function () { return _this.listener.options(endpoint, renderViewCallback); };
-                                                    break;
-                                                case "purge":
-                                                    setter = function () { return _this.listener.purge(endpoint, renderViewCallback); };
-                                                    break;
-                                                case "lock":
-                                                    setter = function () { return _this.listener.lock(endpoint, renderViewCallback); };
-                                                    break;
-                                                case "unlock":
-                                                    setter = function () { return _this.listener.unlock(endpoint, renderViewCallback); };
-                                                    break;
-                                                case "propfind":
-                                                    setter = function () { return _this.listener.propfind(endpoint, renderViewCallback); };
-                                                    break;
-                                            }
-                                            if (setter) {
-                                                if (/^[a-zA-Z]+$/.test(key)) {
-                                                    setter();
-                                                }
-                                                else
-                                                    finalizingCallbacks.push(setter);
-                                            }
-                                        };
-                                        for (var requestType in interfacePrototype) {
-                                            _loop_2(requestType);
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.viewPrototypes()];
+                    case 1:
+                        viewDict = _a.sent();
+                        Array.from(viewDict).sort(function (i) { return /^[0-9]+$/.test(i[0]) ? 1 : -1; }).forEach(function (pair) {
+                            var key = pair[0];
+                            var value = pair[1];
+                            var endpoint = ("/" + key).replace("index", "");
+                            if (/^[0-9]{3}$/.test(key))
+                                _this.listener.use(function (req, res, next) {
+                                    res.status(Number.parseInt(key));
+                                    return res.render(key, {});
+                                });
+                            else if (value) {
+                                var _loop_2 = function (requestType) {
+                                    if (value[requestType] === undefined)
+                                        return "continue";
+                                    var renderViewCallback = function (req, res, next) { return res.render(key, value[requestType](req, res)); };
+                                    var setter = void 0;
+                                    if (/^[a-zA-Z]+$/.test(key)) {
+                                        switch (requestType) {
+                                            case "get":
+                                                setter = function () { return _this.listener.get(endpoint, renderViewCallback); };
+                                                break;
+                                            case "post":
+                                                setter = function () { return _this.listener.post(endpoint, renderViewCallback); };
+                                                break;
+                                            case "put":
+                                                setter = function () { return _this.listener.put(endpoint, renderViewCallback); };
+                                                break;
+                                            case "patch":
+                                                setter = function () { return _this.listener.patch(endpoint, renderViewCallback); };
+                                                break;
+                                            case "delete":
+                                                setter = function () { return _this.listener["delete"](endpoint, renderViewCallback); };
+                                                break;
+                                            case "copy":
+                                                setter = function () { return _this.listener.copy(endpoint, renderViewCallback); };
+                                                break;
+                                            case "head":
+                                                setter = function () { return _this.listener.head(endpoint, renderViewCallback); };
+                                                break;
+                                            case "options":
+                                                setter = function () { return _this.listener.options(endpoint, renderViewCallback); };
+                                                break;
+                                            case "purge":
+                                                setter = function () { return _this.listener.purge(endpoint, renderViewCallback); };
+                                                break;
+                                            case "lock":
+                                                setter = function () { return _this.listener.lock(endpoint, renderViewCallback); };
+                                                break;
+                                            case "unlock":
+                                                setter = function () { return _this.listener.unlock(endpoint, renderViewCallback); };
+                                                break;
+                                            case "propfind":
+                                                setter = function () { return _this.listener.propfind(endpoint, renderViewCallback); };
+                                                break;
                                         }
-                                    });
-                                    finalizingCallbacks.forEach(function (clbk) { return clbk(); });
-                                    resolve();
-                                    return [2 /*return*/];
+                                    }
+                                    if (setter)
+                                        setter();
+                                };
+                                for (var requestType in value) {
+                                    _loop_2(requestType);
+                                }
                             }
                         });
-                    }); })];
+                        resolve();
+                        return [2 /*return*/];
+                }
             });
-        });
-    };
-    /**
-     * SetMiddleware always running for all future assigned endpoint callbacks.
-     *
-     * @param callback middleware callback
-     */
-    WebServer.registerMiddleware = function (callback) {
-        this.listener.use(callback);
+        }); });
     };
     /** ExpressJS server application for listening for webrequests */
     WebServer.listener = express_1["default"]();

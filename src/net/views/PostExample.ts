@@ -2,14 +2,13 @@
  * @module net.views
  */
 
-import { NextFunction } from "express";
 import {IViewTemplate} from "../interfaces/IViewTemplate";
 import { IWebResponse } from "../interfaces/IWebResponse";
 
 /**  Callback interface based on IWebRequest for endpoint: postExample. */
 export const PostExample: IViewTemplate =
 {
-  get(req: Request, res: Response, next: NextFunction): IWebResponse 
+  get(req, res, next): IWebResponse 
   {
     const response: IWebResponse = {
       data:
@@ -21,12 +20,12 @@ export const PostExample: IViewTemplate =
     return response;
   },
 
-  post(req: any, res: any, next: NextFunction): IWebResponse
+  post(req, res, next): IWebResponse
   {
     const response: IWebResponse = {
       data:
       {
-        message: `<h2>Welcome, ${(req.body as any).fname}</h2>`
+        message: `<h2>Welcome, ${((req as any).body as any).fname}</h2>`
       }
     }
 
