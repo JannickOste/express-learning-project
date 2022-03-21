@@ -1,5 +1,6 @@
 <article>
-    <header><a href="https://github.com/JannickOste/expressjs-server/tree/a648d2f5f1ab8e8a40557b54e84bdfface113405"><h1>ExpressJS Server</h1></a></header>
+    <header><h1>ExpressJS Server</h1></header>
+    <a href="https://github.com/JannickOste/expressjs-server/tree/a648d2f5f1ab8e8a40557b54e84bdfface113405">Github page</a>
     <main>
         <p>
             Simple OOP auto loading expressJS server.<br />
