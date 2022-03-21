@@ -1,15 +1,16 @@
 <article>
-    <header><h1>ExpressJS Server</h1></header>
+    <header><a href="https://github.com/JannickOste/expressjs-server/tree/a648d2f5f1ab8e8a40557b54e84bdfface113405"><h1>ExpressJS Server</h1></a</header>
     <main>
         <p>
             Simple OOP auto loading expressJS server.<br />
             Loads ejs files from {root}/views and sets them as GET endpoints, possible other callbacks can be defined in src.net.views
         </p>
-        
-        <p>
-           Github: <a href="https://github.com/JannickOste/expressjs-server/tree/a648d2f5f1ab8e8a40557b54e84bdfface113405">go to</a>
-           Author: <a href="https://oste.dev/">Oste Jannick</a>
-        </p>
+
+        <ul>
+           <li>Github: <a href="https://github.com/JannickOste/expressjs-server/tree/a648d2f5f1ab8e8a40557b54e84bdfface113405">go to</a></li>
+           <li>Author: <a href="https://oste.dev/">Oste Jannick</a></li>
+        </ul>
+
     </main>
 </article>
 
