@@ -142,13 +142,14 @@ export class WebServer
                 {
                     const key: string = pair[0];
                     const value: any = pair[1];
-                    
+                    const setterCallbacks: Function[] = [];
                     const endpoint: string = `/${key}`.replace("index", "");
+                    
                     if(/^[0-9]{3}$/.test(key))
-                        this.listener.use((req, res, next) => {
+                        setterCallbacks.push(() =>this.listener.use((req, res, next) => {
                             res.status(Number.parseInt(key));
                             return res.render(key, {});
-                        });
+                        }));
                     else if (value) {
                         for(const requestType in value)
                         {
@@ -176,9 +177,15 @@ export class WebServer
                             } 
 
                             if(setter)
-                                setter();
+                                setterCallbacks.push(() =>setter);
                         }
                     }
+
+                    try
+                    {
+
+                        setterCallbacks.forEach(clbk => clbk());
+                    } catch(ex){reject(ex)}
                 });
 
             resolve();

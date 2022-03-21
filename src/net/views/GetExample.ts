@@ -1,7 +1,6 @@
 
 /**  @module net.views */
 
-import { NextFunction } from "express";
 import { IWebResponse } from "../interfaces/IWebResponse";
 import { IViewTemplate } from '../interfaces/IViewTemplate';
 
@@ -11,15 +10,13 @@ export const GetExample: IViewTemplate =
   get: (req, res, next): IWebResponse =>
   {
     const index: number = Number.parseInt(`${(req as any).query.index}`);
-    const response: IWebResponse = {
+    return {
       data:
       {
         person: isNaN(index) ? "No person index defined" : [{name: "Jannick Oste"}, {name: "Tom Bom"}][index],
         index: isNaN(index) ? -1 : index
       }
     }
-
-    return response;
   },
 
   post: undefined

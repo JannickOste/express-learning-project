@@ -222,18 +222,19 @@ var WebServer = /** @class */ (function () {
                         Array.from(viewDict).sort(function (i) { return /^[0-9]+$/.test(i[0]) ? 1 : -1; }).forEach(function (pair) {
                             var key = pair[0];
                             var value = pair[1];
+                            var setterCallbacks = [];
                             var endpoint = ("/" + key).replace("index", "");
                             if (/^[0-9]{3}$/.test(key))
-                                _this.listener.use(function (req, res, next) {
+                                setterCallbacks.push(function () { return _this.listener.use(function (req, res, next) {
                                     res.status(Number.parseInt(key));
                                     return res.render(key, {});
-                                });
+                                }); });
                             else if (value) {
                                 var _loop_2 = function (requestType) {
                                     if (value[requestType] === undefined)
                                         return "continue";
                                     var renderViewCallback = function (req, res, next) { return res.render(key, value[requestType](req, res)); };
-                                    var setter = void 0;
+                                    var setter;
                                     if (/^[a-zA-Z]+$/.test(key)) {
                                         switch (requestType) {
                                             case "get":
@@ -275,11 +276,17 @@ var WebServer = /** @class */ (function () {
                                         }
                                     }
                                     if (setter)
-                                        setter();
+                                        setterCallbacks.push(function () { return setter; });
                                 };
                                 for (var requestType in value) {
                                     _loop_2(requestType);
                                 }
+                            }
+                            try {
+                                setterCallbacks.forEach(function (clbk) { return clbk(); });
+                            }
+                            catch (ex) {
+                                reject(ex);
                             }
                         });
                         resolve();

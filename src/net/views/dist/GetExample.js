@@ -6,13 +6,12 @@ exports.GetExample = void 0;
 exports.GetExample = {
     get: function (req, res, next) {
         var index = Number.parseInt("" + req.query.index);
-        var response = {
+        return {
             data: {
                 person: isNaN(index) ? "No person index defined" : [{ name: "Jannick Oste" }, { name: "Tom Bom" }][index],
                 index: isNaN(index) ? -1 : index
             }
         };
-        return response;
     },
     post: undefined
 };
