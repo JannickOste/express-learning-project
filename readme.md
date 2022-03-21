@@ -9,6 +9,7 @@
         <p>
            Github: <a href="https://github.com/JannickOste/expressjs-server/tree/a648d2f5f1ab8e8a40557b54e84bdfface113405">go to</a>
            Author: <a href="https://oste.dev/">Oste Jannick</a>
+        </p>
     </main>
 </article>
 
