@@ -7,13 +7,27 @@
 
 import { Logger } from "./misc/Logger";
 import { WebServer } from "./net/WebServer";
-import { CertGenerator } from './misc/CertGenerator';
+import { CertificateManager } from './net/CertificateManager';
+import { platform } from "os";
+import path from "path";
+import { Globals } from "./misc/Globals";
 
+function init() 
+{
+    Array.from([Globals.configurationRoot, Globals.staticFolder]).forEach(p => {
+        if(!Globals.fs.existsSync(p))
+        {
+            console.log("Creating folder "+p)
+            Globals.fs.mkdirSync(p, {recursive: true});
+        }
+    })
+}
 
 /**
  * Main application entrypoint
  */
 function main() {
+    // init();
     Logger.logMessage("Updating documentation...");
     Logger.dumpDocumentation()
         .then(r => console.log("succesfully updated documentation"))
@@ -22,5 +36,7 @@ function main() {
 
     WebServer.start();
 }
-CertGenerator.generateSSLCertificate("http://localhost:8080");
+
+init();
+CertificateManager.generateSSLCertificate();
 //main();

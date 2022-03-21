@@ -4,18 +4,22 @@
   "description": "",
   "main": ".js",
   "dependencies": {
-    "beautiful-dom": "^1.0.9",
-    "expressjs": "^1.0.1"
+    "expressjs": "^1.0.1",
+    "zip": "^1.2.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
     "@types/node": "^17.0.21",
+    "beautiful-dom": "^1.0.9",
     "ejs": "^3.1.6",
     "express": "^4.17.3",
     "file-system": "^2.2.2",
     "readline-sync": "^1.4.10",
+    "typed-rest-client": "^1.8.6",
     "typedoc": "^0.22.13",
-    "typedoc-plugin-merge-modules": "^3.1.0"
+    "typedoc-plugin-merge-modules": "^3.1.0",
+    "unzip": "^0.1.11",
+    "unzip-stream": "^0.3.1"
   },
   "scripts": {
     "dev": "ts-node ./src/App.ts",

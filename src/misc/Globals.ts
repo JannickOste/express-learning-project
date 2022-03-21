@@ -13,15 +13,15 @@ export class Globals
     public static readonly rlSync = require("readline-sync")
     /** TypeScript "fs" library */
     public static readonly  fs = require("fs");
-
+    /** unzip-stream library */
+    public static readonly unzip = require("unzip-stream")
 
     /** npm file-system library */
     public static readonly fileSystem = require("file-system");
 
     /** Project root */
     public static get projectRoot(): string {
-        const root = (__dirname.match(/^(.*?)(?=(\/|\\)(src))/) as any);
-        return (root !== null ? root[0] : "");
+        return path.dirname(path.dirname(process.argv[1]));
     }
 
     /** Dump location for documentation. */
@@ -41,8 +41,4 @@ export class Globals
         return "public";
     }
 
-    public static readonly consoleCommand = (command: string) => 
-    {
-        
-    }
 }

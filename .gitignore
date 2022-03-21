@@ -6,3 +6,4 @@
 *.key
 *.crt
 *.csr
+**/conf
