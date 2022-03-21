@@ -17,7 +17,6 @@
     </ul>
     </main>
 </article>
-
 <article>
     <header><h2>Starting application in dev mode(no compile required):</h2></header>
     <main>
