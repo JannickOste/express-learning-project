@@ -1,5 +1,5 @@
 <article>
-    <header><h1>ExpressJS Server</h1></header>
+    <header><a href="https://github.com/JannickOste/expressjs-server/tree/a648d2f5f1ab8e8a40557b54e84bdfface113405"><h1>ExpressJS Server</h1></a></header>
     <main>
         <p>
             Simple OOP auto loading expressJS server.<br />
@@ -9,12 +9,20 @@
 </article>
 
 <article>
-    <header><h2>Setup:</h2></header>
+    <header><h2>Building application:</h2></header>
     <main>
     <ul>
-        <li>clone repo</li>
-        <li>npm run install</li>
+        <li>npm run build</li>
         <li>npm run start</li>
+    </ul>
+    </main>
+</article>
+
+<article>
+    <header><h2>Starting application in dev mode(no compile required):</h2></header>
+    <main>
+    <ul>
+        <li>npm run dev</li>
     </ul>
     </main>
 </article>
