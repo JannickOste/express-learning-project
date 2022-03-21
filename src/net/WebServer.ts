@@ -9,7 +9,6 @@ import { Logger } from '../misc/Logger';
 import { Globals } from '../misc/Globals';
 import path from 'path';
 import { IWebRequest } from './interfaces/IWebRequest';
-import { IWebResponse } from './interfaces/IWebResponse';
 
 /**
  * ExpressJS server module extension class.
@@ -48,7 +47,7 @@ export class WebServer
     public static get viewInterfaceNames(): string[] { return (Globals.fs.readdirSync(this.viewInterfacesRoot) as string[]).filter(i => i.toLowerCase().endsWith(".ts")).map(i => i.substring(0, i.length-3));}
     
     /** Get all viewnames and there prototype if available  */
-    public static async viewPrototypes() : Promise<Map<string, {[key: string]: IWebRequest} | undefined>> 
+    public static async getViewPrototypes() : Promise<Map<string, {[key: string]: IWebRequest} | undefined>> 
     {
         let output: Map<string, {[key: string]: IWebRequest} | undefined> = new Map<string, {[key: string]: IWebRequest} | undefined>();
         for(const ejsN of this.ejsViewNames)
@@ -137,17 +136,14 @@ export class WebServer
     {
         return new Promise(async(resolve, reject) => 
         {
-            const viewDict: Map<string, {[key: string]: IWebRequest} | undefined> = await this.viewPrototypes();
-            const sortedDict: any =  Array.from(viewDict).sort(i => /^[0-9]+$/.test(i[0]) ? 1 : -1);
-
             const endpointSetters: Function[] = [];
-            for(const index in sortedDict)
+            for(const pair of await this.getViewPrototypes()) 
             {
-                const ejsName: string = sortedDict[index][0];
-                const callbackInterface: {[key:string]:IWebRequest} = sortedDict[index][1]
+                const ejsName: string = pair[0];
+                const callbackInterface:{[key:string]:IWebRequest} | undefined = pair[1]
 
                 const endpoint: string = `/${ejsName}`.replace("index", "");
-                    
+                
                 if(/^[0-9]{3}$/.test(ejsName))
                 {
                     endpointSetters.push(() => this.listener.use((req, res, next) => {
@@ -156,7 +152,7 @@ export class WebServer
                     }));
                 }
                 else if (/^[a-zA-Z]+$/.test(ejsName)) {
-                    if(callbackInterface)
+                    if(callbackInterface) 
                     {
                         for(const requestType in callbackInterface)
                         {
@@ -166,8 +162,6 @@ export class WebServer
                             let setter: Function | undefined;  
                             if(/^[a-zA-Z]+$/.test(ejsName))
                             {  
-                                
-                                console.log("Creating response setter for "+requestType.toUpperCase()+" at endpoint "+endpoint);
                                 switch(requestType)
                                 {
                                     case "get":      setter = () => this.listener.get(endpoint, renderViewCallback); break;
@@ -188,12 +182,19 @@ export class WebServer
                             if(setter)
                                 endpointSetters.unshift(setter);
                         }
+                    } 
+                    else 
+                    {
+                        endpointSetters.unshift(() => this.listener.get(endpoint, (req: any, res: any, next: any) => {
+                            return res.render(ejsName,  {});
+                        }));
                     }
                 }
             }
 
             try
             {
+                Logger.logMessage(`Found ${endpointSetters.length} request setters, attempting to assign requests to endpoints...`);
                 endpointSetters.filter(i => i !== undefined).forEach(callback => callback());
                 resolve();
             }

@@ -29,6 +29,6 @@ export class Globals
      * public static assets folders. 
      */
     public static get staticFolder(): string {
-        return "public static";
+        return "public";
     }
 }
