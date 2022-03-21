@@ -57,7 +57,6 @@ export class WebServer
                 try
                 {
                     _interface = await import(path.join(this.viewInterfacesRoot, `${interfaceName}.ts`));
-                    console.dir(_interface);
                 } catch(e) {}
             }
             output.set(ejsN, _interface);
@@ -119,85 +118,55 @@ export class WebServer
         return new Promise(async(resolve, reject) => 
         {
             const viewDict: Map<string, IViewTemplate | undefined> = await this.viewInterfaceDict();
-            const setKeys: string[] = [];
-            const defaultResponse: IWebResponse = { data:{} }
-
-            const statusCodeCallbacks: Function[] = [];
+            const finalizingCallbacks: Function[] = [];
             viewDict.forEach((value: IViewTemplate | undefined, key: string) => {
                 const modulePrototype = Object.assign({}, value);
                 const interfaceName: string = Object.getOwnPropertyNames(modulePrototype)[0];
-                const interfacePrototype: IViewTemplate = Object.assign({}, (modulePrototype as {[key: string]: any})[interfaceName])
-
-                if(/^[a-zA-Z]+$/.test(key))
+                
+                const interfacePrototype: {[key: string]: any} = Object.assign({}, (modulePrototype as {[key: string]: any})[interfaceName])
+                const endpoint: string = `/${key}`.replace("index", "");
+                for(const requestType in interfacePrototype)
                 {
-                    WebServer.registerGetEndpoint(`/${key}`.replace("index", ""),
-                        (req, res, next) => {
-                            return (res as any).render(key, interfacePrototype.get ? interfacePrototype.get(req, res) : defaultResponse);
-                    });
-                    
-                    if (interfacePrototype.post) 
-                    {
-                        WebServer.registerPostEndpoint(`/${key}`.replace("index", ""),
-                            (req, res, next) => {
-                                return (res as any).render(key, interfacePrototype.post ? interfacePrototype.post(req, res, next) : defaultResponse);
-                            }
-                        );
+                    const requestCallback = interfacePrototype[requestType];
+                    if(requestCallback === undefined) continue;
+
+                    const renderViewCallback = (req: any, res: any, next : any) => {
+                        return (res as any).render(key, requestCallback(req, res));
                     }
-                    setKeys.push(key);
-                }
-                else if(/^[0-9]{3}$/.test(key))
-                {
-                    statusCodeCallbacks.push(
-                        () =>
-                        {
+                    let setter: Function | undefined;
 
-                            WebServer.registerMiddleware((req: Request, res: Response, next: NextFunction) =>
-                            {
-                                (res as any).status(Number.parseInt(key));
-                                (res as any).render(key, interfacePrototype.get ? interfacePrototype.get(req, res) : defaultResponse);
-                            });
-        
-                            setKeys.push(key);
-                        }
-                    );
+                    switch(requestType)
+                    {
+                        case "get":      setter = () => this.listener.get(endpoint, renderViewCallback); break;
+                        case "post":     setter = () => this.listener.post(endpoint, renderViewCallback); break;
+                        case "put":      setter = () => this.listener.put(endpoint, renderViewCallback); break;
+                        case "patch":    setter = () => this.listener.patch(endpoint,renderViewCallback); break;
+                        case "delete":   setter = () => this.listener.delete(endpoint, renderViewCallback); break;
+                        case "copy":     setter = () => this.listener.copy(endpoint, renderViewCallback); break;
+                        case "head":     setter = () => this.listener.head(endpoint, renderViewCallback); break;
+                        case "options":  setter = () => this.listener.options(endpoint, renderViewCallback); break;
+                        case "purge":    setter = () => this.listener.purge(endpoint, renderViewCallback); break;
+                        case "lock":     setter = () => this.listener.lock(endpoint, renderViewCallback); break;
+                        case "unlock":   setter = () => this.listener.unlock(endpoint, renderViewCallback); break;
+                        case "propfind": setter = () => this.listener.propfind(endpoint, renderViewCallback); break;
+                    }
+                    
+                    if(setter)
+                    {
+                        if(/^[a-zA-Z]+$/.test(key))
+                        {
+                            setter();
+                        } else finalizingCallbacks.push(setter);
+                    } 
                 }
             });
 
-            statusCodeCallbacks.forEach(clbk => clbk());
 
-
-            const unsetkeys = Array.from(viewDict.keys()).filter(k => !setKeys.includes(k));
-            if(unsetkeys.length)
-                reject(new Error(`Failed to set the following views: ${unsetkeys.join(", ")}`));
-            else resolve();
+            finalizingCallbacks.forEach(clbk => clbk());
+            resolve();
         })
     }
 
-    /**
-     * Register a POST callback for a specific endpoint to the listener
-     * 
-     * @param endpoint absolute path on the server
-     * @param callback request event occured callback
-     */
-    public static registerPostEndpoint(endpoint: string, callback: IWebRequest): void 
-    {
-        Logger.logMessage(`Attempting to assign POST callback to: ${endpoint}`);
-
-        this.listener.post(endpoint, callback as any);
-    }
-
-    /**
-     * Register a GET callback for a specific endpoint to the listener
-     * 
-     * @param endpoint absolute server path
-     * @param callback request event occured callback
-     */
-    public static registerGetEndpoint(endpoint: string, callback: IWebRequest): void 
-    {
-        Logger.logMessage(`Attempting to assign GET callback to: ${endpoint}`);
-
-        this.listener.get(endpoint, callback as any);
-    }
 
     /**
      * SetMiddleware always running for all future assigned endpoint callbacks.
