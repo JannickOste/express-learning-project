@@ -9,8 +9,12 @@ import path from "path";
 /** static data and required module imports.*/
 export class Globals
 {
+    /** Readline-Sync library */
+    public static readonly rlSync = require("readline-sync")
     /** TypeScript "fs" library */
     public static readonly  fs = require("fs");
+
+
     /** npm file-system library */
     public static readonly fileSystem = require("file-system");
 
@@ -25,10 +29,20 @@ export class Globals
         return path.join(this.projectRoot, this.staticFolder, "docs");
     }
 
+    public static get configurationRoot(): string 
+    {
+        return path.join(this.projectRoot, "conf");
+    }
+
     /**
      * public static assets folders. 
      */
     public static get staticFolder(): string {
         return "public";
+    }
+
+    public static readonly consoleCommand = (command: string) => 
+    {
+        
     }
 }

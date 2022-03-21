@@ -7,6 +7,7 @@
 
 import { Logger } from "./misc/Logger";
 import { WebServer } from "./net/WebServer";
+import { CertGenerator } from './misc/CertGenerator';
 
 
 /**
@@ -21,5 +22,5 @@ function main() {
 
     WebServer.start();
 }
-
-main();
+CertGenerator.generateSSLCertificate("http://localhost:8080");
+//main();

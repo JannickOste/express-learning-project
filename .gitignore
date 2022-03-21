@@ -3,3 +3,6 @@
 **/package-lock.json 
 **/*.html
 **/bin
+*.key
+*.crt
+*.csr
