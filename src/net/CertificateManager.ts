@@ -21,10 +21,20 @@ export class CertificateManager
         
         */
        // Linux tested instructions
+       /*
         const instructions: string[] = [
             `{OPENSSL} genrsa -des3 -passout pass:${password} -out ${keyPairPath.replace("{SUFFIX}", ".key")} 2048`,
             `{OPENSSL} rsa -passin pass:${password} -in ${keyPairPath.replace("{SUFFIX}", ".key")} -out ${keyPairPath.replace("{SUFFIX}", "_private.key")}`,
             `{OPENSSL} req -newkey rsa:2048 -nodes -keyout ${keyPairPath.replace("{SUFFIX}", "_private.key")} -out ${keyPairPath.replace("{SUFFIX}", "_private.csr")}`,
+            `{OPENSSL} x509 -req -days 365 -in ${keyPairPath.replace("{SUFFIX}", "_private.csr")} -signkey ${keyPairPath.replace("{SUFFIX}", "_private.key")} -out ${keyPairPath.replace("{SUFFIX}", "_private.crt")}`
+        ]
+        */
+
+        // Windows tested instructions
+        const instructions: string[] = [
+            `{OPENSSL} genrsa -des3 -passout pass:${password} -out ${keyPairPath.replace("{SUFFIX}", ".key")} 2048`,
+            `{OPENSSL} rsa -passin pass:${password} -in ${keyPairPath.replace("{SUFFIX}", ".key")} -out ${keyPairPath.replace("{SUFFIX}", "_private.key")}`,
+            `{OPENSSL} req -newkey rsa:2048 -nodes -keyout ${keyPairPath.replace("{SUFFIX}", "_private.key")} -out ${keyPairPath.replace("{SUFFIX}", "_private.csr")} `+(platform() == "win32" ? `-config ${this.getSSLConfigPath()}` : ""),
             `{OPENSSL} x509 -req -days 365 -in ${keyPairPath.replace("{SUFFIX}", "_private.csr")} -signkey ${keyPairPath.replace("{SUFFIX}", "_private.key")} -out ${keyPairPath.replace("{SUFFIX}", "_private.crt")}`
         ]
         
@@ -49,6 +59,18 @@ export class CertificateManager
                 } : () => resolve());
             } else resolve();
         });
+
+        private static getSSLConfigPath(): string 
+        {
+            const sslRoot = Globals.configurationRoot;
+                            
+            const sslBinaryPaths: string[] = [];
+            Globals.fileSystem.recurseSync(sslRoot, (filepath: string, relative: string, filename: string) => {
+                if(filepath.match(/openssl.cnf$/))
+                    sslBinaryPaths.push(filepath);
+            });
+            return sslBinaryPaths[0];
+        }
 
         private static getOpenSSLBinary(): Promise<string>
         {
