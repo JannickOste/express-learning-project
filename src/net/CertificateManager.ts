@@ -13,29 +13,26 @@ export class CertificateManager
 {
     public static async generateSSLCertificate(keyName: string = "ejskey")
     {
-        const password: string = "Testkey"; // Globals.rlSync.question("Enter a key");
-        const keyPairPath: string = `${path.join(Globals.configurationRoot, "{KEYNAME}.key").replace("{KEYNAME}", keyName)}"`;
-        const keyPairPrivPath: string = `"${path.join(Globals.configurationRoot, "{KEYNAME}_private.key".replace("{KEYNAME}", keyName))}"`;
+        const password: string = "test"; // Globals.rlSync.question("Enter a key");
+        const keyPairPath: string = `"${path.join(Globals.configurationRoot, "{KEYNAME}{SUFFIX}").replace("{KEYNAME}", keyName)}"`;
         /**&
-         * https://www.namecheap.com/support/knowledgebase/article.aspx/10161/14/generating-a-csr-on-windows-using-openssl/
+         * https://www.namecheap.com/support/knowledgebTestkeyase/article.aspx/10161/14/generating-a-csr-on-windows-using-openssl/
          * https://dev.to/openlab/creating-opensslconf-for-windows-104g
         
         */
+       // Linux tested instructions
         const instructions: string[] = [
-            `{OPENSSL} genrsa -des3 -passout pass:${password} -out ${keyPairPath} 2048`,
-            `{OPENSSL} rsa -passin pass:${password} -in ${keyPairPath} -out ${keyPairPrivPath}`,
-            `{OPENSSL} req -new -x509 -nodes -sha256 -days 365 -key ${keyPairPrivPath} -out ${keyPairPrivPath.replace(/key(?=\")/, "crt")}`
-            //`{OPENSSL} req -newkey rsa:2048 -nodes -keyout ${keyPairPrivPath} -out ${keyPairPrivPath.replace(/key\"$/g, "csr")}`,
-            //`{OPENSSL} req -new -key "${keyPairPrivPath}" -out "${keyPairPrivPath.replace(/key$/g, "csr")}"`,
-            //`{OPENSSL} x509 -req -days 365 -in ${keyPairPrivPath.replace(/key$/g, "csr")} -signkey ${keyPairPrivPath} -out ${keyPairPrivPath.replace(/key$/g, "crt")}`
-            //`{OPENSSL} x509 -in d:\apache\conf\server.csr -out d:\apache\conf\server.crt -req -signkey d:\apache\conf\server.key -days 365`
-
+            `{OPENSSL} genrsa -des3 -passout pass:${password} -out ${keyPairPath.replace("{SUFFIX}", ".key")} 2048`,
+            `{OPENSSL} rsa -passin pass:${password} -in ${keyPairPath.replace("{SUFFIX}", ".key")} -out ${keyPairPath.replace("{SUFFIX}", "_private.key")}`,
+            `{OPENSSL} req -newkey rsa:2048 -nodes -keyout ${keyPairPath.replace("{SUFFIX}", "_private.key")} -out ${keyPairPath.replace("{SUFFIX}", "_private.csr")}`,
+            `{OPENSSL} x509 -req -days 365 -in ${keyPairPath.replace("{SUFFIX}", "_private.csr")} -signkey ${keyPairPath.replace("{SUFFIX}", "_private.key")} -out ${keyPairPath.replace("{SUFFIX}", "_private.crt")}`
         ]
         
         let openssl: string = await this.getOpenSSLBinary();
         
         await this.consoleCommand(... instructions.map(i => i.replace("{OPENSSL}", openssl)));
     }
+    
 
     private static readonly consoleCommand = (... commands: string[] ): Promise<void> =>
         new Promise((resolve, reject) => 
@@ -48,7 +45,7 @@ export class CertificateManager
                 proc.on("error", (ex) => reject(ex));
                 proc.on("exit", commands.length != 0 ? () => {
                     commands.shift();
-                    this.consoleCommand(...commands)
+                    return CertificateManager.consoleCommand(...commands)
                 } : () => resolve());
             } else resolve();
         });
@@ -104,7 +101,14 @@ export class CertificateManager
                         break;
 
                         case "linux":
-                            resolve("openssl");
+                            if(process.getuid() !== 0)
+                                reject(new Error("Elevated user permissions required"));
+                            else 
+                            {
+                                // Breaks code currently need to look into
+                                //await this.consoleCommand("sudo apt-get install openssl -y");
+                                resolve("openssl");
+                            }
                             break;
                 }
             })

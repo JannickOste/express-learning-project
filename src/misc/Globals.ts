@@ -13,6 +13,7 @@ export class Globals
     public static readonly rlSync = require("readline-sync")
     /** TypeScript "fs" library */
     public static readonly  fs = require("fs");
+
     /** unzip-stream library */
     public static readonly unzip = require("unzip-stream")
 
@@ -21,7 +22,8 @@ export class Globals
 
     /** Project root */
     public static get projectRoot(): string {
-        return path.dirname(path.dirname(process.argv[1]));
+        const root = (__dirname.match(/^(.*?)(?=(\/|\\)(src))/) as any);
+        return (root !== null ? root[0] : "");
     }
 
     /** Dump location for documentation. */
@@ -41,4 +43,5 @@ export class Globals
         return "public";
     }
 
+ 
 }
