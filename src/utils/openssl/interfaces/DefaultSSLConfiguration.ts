@@ -1,3 +1,6 @@
+/**
+ * @module utils.openssl.interfaces
+ */
 import { Globals } from "../../../misc/Globals";
 import { OpenSSL } from "../OpenSSL";
 import {

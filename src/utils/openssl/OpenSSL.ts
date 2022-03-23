@@ -1,5 +1,5 @@
 /**
- * @module net
+ * @module utils.openssl
  */
 
  import {
