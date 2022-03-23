@@ -39,6 +39,7 @@ function main() {
 
 init();
 
-console.log(OpenSSL.generateSSLCertificate());
+
+OpenSSL.generateSSLCertificate();
 //CertificateManager.generateSSLCertificate();
 //main();

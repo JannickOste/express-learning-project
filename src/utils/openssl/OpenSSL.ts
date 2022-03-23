@@ -13,13 +13,18 @@ import { ISSLConfiguration } from './interfaces/ISSLConfiguration';
 import { DefaultSSLConfiguration } from "./interfaces/DefaultSSLConfiguration";
 import { System } from "../../misc/System";
 
+/**
+ * @!TODO: 
+ * - Download breaks generation procedure (fix)
+ * - Add installation commands for all linux package managers.
+ */
 export class OpenSSL {
     public static readonly keyName: string = "ejskey";
-    
 
     public static async generateSSLCertificate(): Promise<void> {
         const sslConfig: ISSLConfiguration = new DefaultSSLConfiguration();
         const sslBinary: string | undefined = await this.getOpenSSLBinary();
+        
         if(sslBinary)
         {
             let check = false;
@@ -51,8 +56,8 @@ export class OpenSSL {
         ciphers: string
     } {
         return {
-            key: Globals.fs.readFileSync(path.join(Globals.configurationRoot, this.keyName + "_private.key"), "utf-8"),
-            cert: Globals.fs.readFileSync(path.join(Globals.configurationRoot, this.keyName + "_private.crt"), "utf-8"),
+            key: Globals.fs.readFileSync(path.join(Globals.configurationRoot,  "certs", this.keyName + "_private.key"), "utf-8"),
+            cert: Globals.fs.readFileSync(path.join(Globals.configurationRoot, "certs", this.keyName + "_private.crt"), "utf-8"),
             ciphers: "DEFAULT:!SSLv2:!RC4:!EXPORT:!LOW:!MEDIUM:!SHA1"
         };
     }
@@ -70,8 +75,7 @@ export class OpenSSL {
 
     private static getOpenSSLBinary(): Promise < string > {
         switch (platform()) {
-            case "win32":
-                return this.getOpenSSLBinaryWindows();
+            case "win32": return this.getOpenSSLBinaryWindows();
             case "linux": return this.getOpenSSLBinaryLinux();
         }
 
@@ -80,12 +84,26 @@ export class OpenSSL {
 
     private static getOpenSSLBinaryLinux(): Promise<string>
     {
-        return new Promise<string>((resolve, reject) => {
+        return new Promise<string>(async(resolve, reject) => {
             if (process.getuid() !== 0)
                 reject(new Error("Elevated user permissions required"));
-            else {
-                // Breaks code currently need to look into
-                //await this.consoleCommand("sudo apt-get install openssl -y");
+            else 
+            {
+                switch(System.packageManager)
+                {
+                    case "apt-get":
+                        if((await System.shellCommand(... [
+                            "sudo apt list | grep ^openssl"
+                        ])).length > 0) break;
+                        else await System.shellCommand(
+                            "sudo apt-get update", 
+                            "sudo apt-get install openssl -y",
+                        );
+                        break;
+                        
+                    default: reject("Unsupported package manager");
+                }
+                
                 resolve("openssl");
             }
         });
@@ -108,6 +126,7 @@ export class OpenSSL {
                 if (sslBinary !== undefined) {
                     if (process.arch == "x86" && sslBinary.includes("x64"))
                         reject(new Error("Attempted to load invalid architecture executable for OpenSSL"));
+                        
                     if (sslBinary === undefined) reject(new Error("Failed to fetch openssl subfolder"));
                     else resolve(`"${sslBinary}"`);
                 } else {
@@ -126,7 +145,6 @@ export class OpenSSL {
                         }));
     
                 }
-    
             } catch (ex) {
                 reject(ex);
             }
