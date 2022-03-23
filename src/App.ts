@@ -10,10 +10,11 @@ import { WebServer } from "./net/WebServer";
 import { Globals } from "./misc/Globals";
 import { System } from './misc/System';
 import { OpenSSL } from "./utils/openssl/OpenSSL";
+import path from "path";
 
 function init() 
 {
-    Array.from([Globals.configurationRoot, Globals.staticFolder]).forEach(p => {
+    Array.from([Globals.configurationRoot, Globals.staticFolder, path.join(Globals.configurationRoot, "certs")]).forEach(p => {
         if(!Globals.fs.existsSync(p))
         {
             console.log("Creating folder "+p)
@@ -38,9 +39,6 @@ function main() {
 
 init();
 
-console.log(System.distribution);
-console.log(System.packageManager);
-console.log(System.releaseInfoPath);
-console.log(OpenSSL.generateSSLConfiguration());
+console.log(OpenSSL.generateSSLCertificate());
 //CertificateManager.generateSSLCertificate();
 //main();

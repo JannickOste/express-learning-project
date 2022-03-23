@@ -58,7 +58,7 @@ export class System
     }
 
 
-    private static readonly shellCommand = (... commands: string[] ): Promise<string[]> =>
+    public static readonly shellCommand = (... commands: string[] ): Promise<string[]> =>
         new Promise((resolve, reject) => 
         { 
             if(commands.length >= 1)
