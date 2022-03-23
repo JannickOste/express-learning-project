@@ -5,8 +5,18 @@ import { HttpClient } from "typed-rest-client/HttpClient";
 import { Globals } from "../misc/Globals";
 import { Logger } from "../misc/Logger";
 
+/**
+ * Webclient for external scraping/downloading tasks.
+ */
 export class WebClient 
 {
+    /**
+     * Download a file from a URL.
+     * 
+     * @param url the URL endpoints.
+     * @param output Filepath to output location
+     * @returns resolve(void) / reject(Error)
+     */
     public static downloadFile(url: string, output: string): Promise<void>
     {
         return new Promise(async(resolve, reject) => {

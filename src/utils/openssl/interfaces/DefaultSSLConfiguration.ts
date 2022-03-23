@@ -7,6 +7,9 @@ import {
     ISSLConfiguration
 } from "./ISSLConfiguration";
 
+/**
+ * Default data for the ISSLConfiguration interface.
+ */
 export class DefaultSSLConfiguration implements ISSLConfiguration 
 {
     public readonly default_ca="CA_DEFAULT";

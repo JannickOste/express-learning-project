@@ -14,15 +14,17 @@ import { DefaultSSLConfiguration } from "./interfaces/DefaultSSLConfiguration";
 import { System } from "../../misc/System";
 
 /**
- * @!TODO: 
- * - Download breaks generation procedure (fix)
- * - Add installation commands for all linux package managers.
+ * OpenSSL handling class.
+ * 
+ * TODO: Add openssl root filepath to class and process filepaths based on that. 
  */
 export class OpenSSL {
     public static readonly keyName: string = "ejskey";
-
-    public static async generateSSLCertificate(): Promise<void> {
-        const sslConfig: ISSLConfiguration = new DefaultSSLConfiguration();
+    
+    /**
+     * Create a self signed certificate based on an ISSLConfiguration interface, downloads OpenSSL if not installed. 
+     */
+    public static async generateSSLCertificate(sslConfig: ISSLConfiguration = new DefaultSSLConfiguration()): Promise<void> {
         const sslBinary: string | undefined = await this.getOpenSSLBinary();
         
         if(sslBinary)
@@ -37,6 +39,12 @@ export class OpenSSL {
         }
     }
 
+    /**
+     * Generate the public/private pair(key), private key(_private.key), private certificate(crt) and corp resposibility file(csr)
+     * 
+     * @param sslPath path to the OpenSSL binary.
+     * @param config OpenSSL configuration interface.
+     */
     private static async generateSSLCertFromInterface(sslPath: string, config: ISSLConfiguration): Promise<void>
     {
         const password: string = "test"; // Globals.rlSync.question("Enter a key");
@@ -50,6 +58,9 @@ export class OpenSSL {
         ].map(i => i.replace("{OPENSSL}", sslPath)));
     }
 
+    /**
+     * Get the key/crt file data + allowed ciphers as object
+     */
     public static get getKeyCertPair(): {
         key: string,
         cert: string,
@@ -62,6 +73,11 @@ export class OpenSSL {
         };
     }
 
+    /**
+     * Generate the openssl.cnf file in the certs folder 
+     * 
+     * @param config 
+     */
     private static generateSSLConfiguration(config: ISSLConfiguration = new DefaultSSLConfiguration()): void 
     {
         const configMap: {[key:string]:any} = Object.assign({}, config);
@@ -73,15 +89,33 @@ export class OpenSSL {
         Globals.fs.writeFileSync(path.join(config.dir, "certs", "openssl.cnf"), template);
     }
 
+    /**
+     * Get OpenSSL path on platform, if not localy/globaly installed download required binaries.
+     * 
+     * @returns openssl binary path / Error -> 
+     */
     private static getOpenSSLBinary(): Promise < string > {
-        switch (platform()) {
-            case "win32": return this.getOpenSSLBinaryWindows();
-            case "linux": return this.getOpenSSLBinaryLinux();
-        }
+        return new Promise<string>((resolve, reject) => 
+        {
+            try
+            {
+                switch (platform()) {
+                    case "win32": resolve(this.getOpenSSLBinaryWindows()); break;
+                    case "linux": resolve(this.getOpenSSLBinaryLinux()); break;
+                }
+            } catch(ex) { 
+                reject(ex); 
+            }
 
-        return Promise.reject(new Error("Unsupported platform"));
+            reject(new Error("Unsupported platform"));
+        });
     }
 
+    /**
+     * Check or OpenSSL is installed, if so return "openssl" otherwise attempt to install the package and return "openssl" if succesfull otherwise reject installation error
+     *
+     * @returns "openssl" / Error: installation error.
+     */
     private static getOpenSSLBinaryLinux(): Promise<string>
     {
         return new Promise<string>(async(resolve, reject) => {
@@ -109,6 +143,15 @@ export class OpenSSL {
         });
     }
 
+    /**
+     * Fetch the location of the local OpenSSL location, if not found download the OpenSSL binary and return x86 or x64 filepath based on process.arch.
+     * 
+     * @returns Filepath to local OpenSSL binary.
+     */
+     /* TodoList
+     * - TODO: Add registry check for openssl
+     * - FIXME: return handling, generateSSLCertificate breaks after file extract.
+     */
     private static getOpenSSLBinaryWindows(): Promise<string>
     {
         return new Promise<string>(async(resolve, reject) => {
@@ -138,7 +181,7 @@ export class OpenSSL {
     
                     Logger.logMessage(`unzipping ${zipFile}...`);
                     await Globals.fs.createReadStream(path.join(sslRoot, zipFile))
-                        .on("finish", async () => resolve(await this.getOpenSSLBinary()))
+                        .on("finish", async () => resolve(await this.getOpenSSLBinaryWindows()))
                         .on("error", (ex: any) => reject(ex))
                         .pipe(Globals.unzip.Extract({
                             path: Globals.configurationRoot

@@ -1,6 +1,11 @@
 /**
  * @module utils.openssl.interfaces
  */
+
+
+/**
+ * OpenSSL configuration interface.
+ */
 export interface ISSLConfiguration {
     default_ca: string, 
     dir: string,
