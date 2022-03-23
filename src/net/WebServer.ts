@@ -12,9 +12,8 @@ import {
     Globals
 } from '../misc/Globals';
 import path from 'path';
-import {
-    IWebRequest
-} from './interfaces/IWebRequest';
+import { IWebRequest } from "./interfaces/IWebRequest";
+import { OpenSSL } from '../utils/openssl/OpenSSL';
 
 /**
  * ExpressJS server module extension class.
@@ -26,14 +25,18 @@ export class WebServer {
     /** ExpressJS server application for listening for webrequests */
     private static readonly listener = express();
 
+
     /** Listening port for webrequests. */
-    public static get serverPort(): Number {
+    public static get httpPort(): Number {
         return this.listener.get("port");
     }
     /** Internal setter for listening port. */
-    private static set _serverPort(value: Number) {
+    private static set _httpPort(value: Number) {
         this.listener.set("port", value);
     };
+    
+    private static _httpsPort: number = 443;
+    public static get httpsPort(): number {return this._httpsPort;}
 
     /** Get the current rendering engine for express-js (default: ejs) */
     public static get viewEngine(): string {
@@ -105,12 +108,13 @@ export class WebServer {
      * 
      * @psuedocode setupListener
      * - Then it assigns middle ware for incomming json objects, url encoded objects and an accessor for access to the public files directory.
-     * - Then it sets the port to the port argument (default:  8080)
+     * - Then it sets the port to the port argument (default:  80)
      */
     private static setupListener({
         assetsFolder = "public",
-        port = 8080
-    } = {}): void {
+        port = 80
+    } = {}): void 
+    {
 
         this.listener.use(express.json({
             limit: "1mb"
@@ -120,7 +124,7 @@ export class WebServer {
         }));
         this.listener.use(express.static(assetsFolder));
 
-        this._serverPort = port;
+        this._httpPort = port;
     }
 
     /**
@@ -229,10 +233,19 @@ export class WebServer {
         this.viewEngine = "ejs";
         this.setEndpoints()
             .then(v => {
-                try {
-                    this.listener.listen(this.serverPort,
-                        () => console.log(`[${this.constructor.name}]: listening for requests on port ${this.serverPort}`));
+                try 
+                {
+                    const httpServer = Globals.http.createServer(this.listener);
+                    const httpsServer = Globals.https.createServer(this.listener, OpenSSL.getKeyCertPair);
 
+                    httpServer.listen(this.httpPort, () => Logger.logMessage(`Loadded HTTP socket at port; ${this.httpPort}...`));
+                    httpsServer.listen(this.httpsPort, () => Logger.logMessage(`Loaded HTTPS socket at port; ${this.httpsPort}...`));
+                    
+                    /*
+                    this.listener.listen(this.httpPort,
+                        () => console.log(`[${this.constructor.name}]: listening for requests on port ${this.httpPort} & ${this.httpsPort}`));
+                        
+                    */
                 } catch (ex) {
                     if (ex instanceof Error)
                         console.log(ex.message);

@@ -7,3 +7,4 @@
 *.crt
 *.csr
 **/conf
+*.pem

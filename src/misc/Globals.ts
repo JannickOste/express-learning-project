@@ -20,6 +20,9 @@ export class Globals
     /** npm file-system library */
     public static readonly fileSystem = require("file-system");
 
+    public static readonly http = require("http");
+    public static readonly https = require("https");
+
     /** Project root */
     public static get projectRoot(): string {
         const root = (__dirname.match(/^(.*?)(?=(\/|\\)(src))/) as any);

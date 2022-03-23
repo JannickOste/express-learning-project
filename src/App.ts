@@ -7,10 +7,9 @@
 
 import { Logger } from "./misc/Logger";
 import { WebServer } from "./net/WebServer";
-import { CertificateManager } from './net/CertificateManager';
-import { platform } from "os";
-import path from "path";
 import { Globals } from "./misc/Globals";
+import { System } from './misc/System';
+import { OpenSSL } from "./utils/openssl/OpenSSL";
 
 function init() 
 {
@@ -38,5 +37,10 @@ function main() {
 }
 
 init();
-CertificateManager.generateSSLCertificate();
+
+console.log(System.distribution);
+console.log(System.packageManager);
+console.log(System.releaseInfoPath);
+console.log(OpenSSL.generateSSLConfiguration());
+//CertificateManager.generateSSLCertificate();
 //main();
