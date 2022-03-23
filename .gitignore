@@ -8,3 +8,4 @@
 *.csr
 **/conf
 *.pem
+*.rnd
