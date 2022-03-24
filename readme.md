@@ -7,7 +7,7 @@
 </p>
 <ul>
    <li>Github: <a href="https://github.com/JannickOste/expressjs-server/">go to</a></li>
-   <li>Author: <a href="https://oste.dev/">Oste Jannick</a></li>
+   <li>Github: <a href="https://github.com/JannickOste/expressjs-server/tree/a648d2f5f1ab8e8a40557b54e84bdfface113405">go to</a></li>
 </ul>
 
 <h2>Building application:</h2>
